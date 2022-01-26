@@ -1,0 +1,1 @@
+Common Files used in the 6GHz AFC specification documents
