@@ -6,4 +6,5 @@ This directory contains code for AFC system testing.
 * Python 3.10.2 (https://www.python.org/downloads/release/python-3102/)
 
 ## Code location
-* TBD
+* Test framework:
+    *   **./test_main.py**: Main entrypoint to run all test cases.
