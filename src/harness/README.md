@@ -3,7 +3,7 @@
 This directory contains code for AFC system testing.
 
 ## Code prerequisites
-* TBD
+* Python 3.10.2 (https://www.python.org/downloads/release/python-3102/)
 
 ## Code location
 * TBD
