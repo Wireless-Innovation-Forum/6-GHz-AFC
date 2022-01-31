@@ -15,6 +15,4 @@
 
 If writing your own top level script to run the test harness,
 look here how the setup is performed.
-It is particularly important to correctly set the geo drivers
-and multiprocessing pool for best performance
 """
