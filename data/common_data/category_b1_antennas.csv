@@ -1,68 +1,68 @@
-manufacturerNormalized,antennaModelPrefix,note,,SQL Insert
-RFS/Cablewave,DA659,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('DA659');
-RFS/Cablewave,DA665,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('DA665');
-RFS/Cablewave,DA6W57,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('DA6W57');
-RFS/Cablewave,DAX1065,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('DAX1065');
-RFS/Cablewave,DAX665,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('DAX665');
-RFS/Cablewave,DAX865,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('DAX865');
-Gabriel Electronics,DD664DSE,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('DD664DSE');
-Commscope/Andrew,HDH1065,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('HDH1065');
-Commscope/Andrew,HDH665,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('HDH665');
-Commscope/Andrew,HDH865,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('HDH865');
-Commscope/Andrew,HDV665,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('HDV665');
-Commscope/Andrew,HDV865,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('HDV865');
-Commscope/Andrew,HP1057W,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('HP1057W');
-Commscope/Andrew,HP657W,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('HP657W');
-Commscope/Andrew,HP857W,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('HP857W');
-Commscope/Andrew,P1059,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P1059');
-Commscope/Andrew,P1065,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P1065');
-Commscope/Andrew,P1259,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P1259');
-Commscope/Andrew,P1265,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P1265');
-Commscope/Andrew,P1559,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P1559');
-Commscope/Andrew,P1565,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P1565');
-Commscope/Andrew,P657W,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P657W');
-Commscope/Andrew,P659,"P6-59.  This prefix also matches the Mark Antenna P-6596, also a category B1 antenna.  ",,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P659');
-Commscope/Andrew,P665,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P665');
-Commscope/Andrew,P857W,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P857W');
-Commscope/Andrew,P859,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P859');
-Commscope/Andrew,P865,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('P865');
-RFS/Cablewave,PA1059,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA1059');
-RFS/Cablewave,PA1065,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA1065');
-RFS/Cablewave,PA10W57,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA10W57');
-RFS/Cablewave,PA10W59,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA10W59');
-RFS/Cablewave,PA1259,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA1259');
-RFS/Cablewave,PA1265,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA1265');
-RFS/Cablewave,PA12W59,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA12W59');
-RFS/Cablewave,PA659,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA659');
-RFS/Cablewave,PA665,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA665');
-RFS/Cablewave,PA6W57,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA6W57');
-RFS/Cablewave,PA6W59,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA6W59');
-RFS/Cablewave,PA859,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA859');
-RFS/Cablewave,PA865,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA865');
-RFS/Cablewave,PA8W57,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA8W57');
-RFS/Cablewave,PA8W59,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PA8W59');
-Commscope/Andrew,PL1057W,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL1057W');
-Commscope/Andrew,PL1059,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL1059');
-Commscope/Andrew,PL1065,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL1065');
-Commscope/Andrew,PL1259,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL1259');
-Commscope/Andrew,PL1265,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL1265');
-Commscope/Andrew,PL1559,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL1559');
-Commscope/Andrew,PL1565,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL1565');
-Commscope/Andrew,PL657W,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL657W');
-Commscope/Andrew,PL659,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL659');
-Commscope/Andrew,PL665,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL665');
-Commscope/Andrew,PL857W,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL857W');
-Commscope/Andrew,PL859,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL859');
-Commscope/Andrew,PL865,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PL865');
-Commscope/Andrew,PXL1059,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PXL1059');
-Commscope/Andrew,PXL1065,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PXL1065');
-Commscope/Andrew,PXL1259,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PXL1259');
-Commscope/Andrew,PXL1265,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PXL1265');
-Commscope/Andrew,PXL659,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PXL659');
-Commscope/Andrew,PXL665,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PXL665');
-Commscope/Andrew,PXL859,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PXL859');
-Commscope/Andrew,PXL865,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('PXL865');
-Gabriel Electronics,RFD8264BSE,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('RFD8264BSE');
-Radiowaves,SP659,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('SP659');
-Radiowaves,SP664,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('SP664');
-Radiowaves,SP859,,,insert into tmp_py_ant_cat_b1_model_prefix (antennaModelPrefix) values ('SP859');
+manufacturerNormalized,antennaModelPrefix,note
+RFS/Cablewave,DA659,
+RFS/Cablewave,DA665,
+RFS/Cablewave,DA6W57,
+RFS/Cablewave,DAX1065,
+RFS/Cablewave,DAX665,
+RFS/Cablewave,DAX865,
+Gabriel Electronics,DD664DSE,
+Commscope/Andrew,HDH1065,
+Commscope/Andrew,HDH665,
+Commscope/Andrew,HDH865,
+Commscope/Andrew,HDV665,
+Commscope/Andrew,HDV865,
+Commscope/Andrew,HP1057W,
+Commscope/Andrew,HP657W,
+Commscope/Andrew,HP857W,
+Commscope/Andrew,P1059,
+Commscope/Andrew,P1065,
+Commscope/Andrew,P1259,
+Commscope/Andrew,P1265,
+Commscope/Andrew,P1559,
+Commscope/Andrew,P1565,
+Commscope/Andrew,P657W,
+Commscope/Andrew,P659,"P6-59.  This prefix also matches the Mark Antenna P-6596, also a category B1 antenna.  "
+Commscope/Andrew,P665,
+Commscope/Andrew,P857W,
+Commscope/Andrew,P859,
+Commscope/Andrew,P865,
+RFS/Cablewave,PA1059,
+RFS/Cablewave,PA1065,
+RFS/Cablewave,PA10W57,
+RFS/Cablewave,PA10W59,
+RFS/Cablewave,PA1259,
+RFS/Cablewave,PA1265,
+RFS/Cablewave,PA12W59,
+RFS/Cablewave,PA659,
+RFS/Cablewave,PA665,
+RFS/Cablewave,PA6W57,
+RFS/Cablewave,PA6W59,
+RFS/Cablewave,PA859,
+RFS/Cablewave,PA865,
+RFS/Cablewave,PA8W57,
+RFS/Cablewave,PA8W59,
+Commscope/Andrew,PL1057W,
+Commscope/Andrew,PL1059,
+Commscope/Andrew,PL1065,
+Commscope/Andrew,PL1259,
+Commscope/Andrew,PL1265,
+Commscope/Andrew,PL1559,
+Commscope/Andrew,PL1565,
+Commscope/Andrew,PL657W,
+Commscope/Andrew,PL659,
+Commscope/Andrew,PL665,
+Commscope/Andrew,PL857W,
+Commscope/Andrew,PL859,
+Commscope/Andrew,PL865,
+Commscope/Andrew,PXL1059,
+Commscope/Andrew,PXL1065,
+Commscope/Andrew,PXL1259,
+Commscope/Andrew,PXL1265,
+Commscope/Andrew,PXL659,
+Commscope/Andrew,PXL665,
+Commscope/Andrew,PXL859,
+Commscope/Andrew,PXL865,
+Gabriel Electronics,RFD8264BSE,
+Radiowaves,SP659,
+Radiowaves,SP664,
+Radiowaves,SP859,
