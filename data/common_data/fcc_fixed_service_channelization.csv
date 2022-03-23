@@ -22,7 +22,6 @@ channelFrequency,channelBandwidth,Notes
 5955.08,10,
 5960.025,60,
 5964.97,10,
-5967.4375,30,"Obsolete FCC ""C"" Plan"
 5974.85,30,
 5984.73,10,
 5994.62,10,
@@ -33,7 +32,6 @@ channelFrequency,channelBandwidth,Notes
 6034.15,30,
 6044.03,10,
 6053.92,10,
-6056.3875,30,"Obsolete FCC ""C"" Plan"
 6063.8,30,
 6073.68,10,
 6078.625,60,
@@ -168,12 +166,10 @@ channelFrequency,channelBandwidth,Notes
 6181.45,0.8,
 6181.65,0.4,
 6187.36,10,
-6189.8275,30,"Obsolete FCC ""C"" Plan"
 6197.24,30,
 6207.12,10,
 6212.065,60,
 6217.01,10,
-6219.4775,30,"Obsolete FCC ""C"" Plan"
 6226.89,30,
 6236.77,10,
 6246.66,10,
@@ -184,7 +180,6 @@ channelFrequency,channelBandwidth,Notes
 6286.19,30,
 6296.07,10,
 6305.96,10,
-6308.4275,30,"Obsolete FCC ""C"" Plan"
 6315.84,30,
 6325.72,10,
 6330.665,60,
