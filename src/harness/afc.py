@@ -18,5 +18,5 @@ import configparser
 def GetTestingAfc():
   config_parser = configparser.RawConfigParser()
   config_parser.read(['afc.cfg'])
-  afc_base_url = config.parser.get('AfcConfig', 'AfcBaseUrl')
-  return AfcImpl(afc_base_url)
+  afc_base_url = config_parser.get('AfcConfig', 'AdminApiBaseUrl')
+  return afc_base_url
