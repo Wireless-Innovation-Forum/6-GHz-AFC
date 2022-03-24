@@ -1,0 +1,19 @@
+{
+  "availableSpectrumInquiryRequests": [
+    {
+      "deviceDescriptor": {
+        "certificationId": [
+          {}
+        ]
+      },
+      "location": {
+        "elevation": {
+          "heightType": ""
+        },
+        "ellipse": {
+          "center": {}
+        }
+      }
+    }
+  ]
+}

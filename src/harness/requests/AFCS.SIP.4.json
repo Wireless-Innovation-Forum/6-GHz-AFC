@@ -1,0 +1,57 @@
+{
+  "version": "1.1",
+  "availableSpectrumInquiryRequests": [
+    {
+      "requestId": "REQ-SIP4",
+      "deviceDescriptor": {
+        "serialNumber": "SN-SIP4",
+        "certificationId": [
+          {
+            "nra": "FCC",
+            "id": "FCCID-SIP4"
+          }
+        ],
+        "rulesetIds": [
+          "US_47_CFR_PART_15_SUBPART_E"
+        ]
+      },
+      "location": {
+        "elevation": {
+          "height": 18.0,
+          "heightType": "AGL",
+          "verticalUncertainty": 2
+        },
+        "ellipse": {
+          "center": {
+            "longitude": -119.585033,
+            "latitude": 48.361254
+          },
+          "majorAxis": 150,
+          "minorAxis": 150,
+          "orientation": 0.0
+        },
+        "indoorDeployment": 0
+      },
+      "inquiredFrequencyRange": [
+        {
+          "lowFrequency": 6525,
+          "highFrequency": 6875
+        }
+      ],
+      "inquiredChannels": [
+        {
+          "globalOperatingClass": 131
+        },
+        {
+          "globalOperatingClass": 132
+        },
+        {
+          "globalOperatingClass": 133
+        },
+        {
+          "globalOperatingClass": 134
+        }
+      ]
+    }
+  ]
+}

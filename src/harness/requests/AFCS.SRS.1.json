@@ -1,0 +1,61 @@
+{
+  "version": "1.1",
+  "availableSpectrumInquiryRequests": [
+    {
+      "requestId": "REQ-SRS1",
+      "deviceDescriptor": {
+        "serialNumber": "SN-SRS1",
+        "certificationId": [
+          {
+            "nra": "FCC",
+            "id": "FCCID-SRS1"
+          }
+        ],
+        "rulesetIds": [
+          "US_47_CFR_PART_15_SUBPART_E"
+        ]
+      },
+      "location": {
+        "elevation": {
+          "height": 3.0,
+          "heightType": "AGL",
+          "verticalUncertainty": 2
+        },
+        "ellipse": {
+          "center": {
+            "longitude": -97.560614,
+            "latitude": 33.180621
+          },
+          "majorAxis": 100,
+          "minorAxis": 50,
+          "orientation": 45.0
+        },
+        "indoorDeployment": 0
+      },
+      "inquiredFrequencyRange": [
+        {
+          "lowFrequency": 5925,
+          "highFrequency": 6425
+        },
+        {
+          "lowFrequency": 6525,
+          "highFrequency": 6875
+        }
+      ],
+      "inquiredChannels": [
+        {
+          "globalOperatingClass": 131
+        },
+        {
+          "globalOperatingClass": 132
+        },
+        {
+          "globalOperatingClass": 133
+        },
+        {
+          "globalOperatingClass": 134
+        }
+      ]
+    }
+  ]
+}
