@@ -13,6 +13,8 @@
 #    limitations under the License.
 """Implementation of AFC System interface."""
 
+import configparser
+
 def GetTestingAfc():
   config_parser = configparser.RawConfigParser()
   config_parser.read(['afc.cfg'])
