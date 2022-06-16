@@ -19,15 +19,12 @@
 # whereas parameters that are optional have a default value of None. Values
 # that are conditionally required have default values of None.
 
+from interface_common import FrequencyRange
+
 class Channels:
   def __init__(self, globalOperatingClass, channelCfi=None):
     self.globalOperatingClass = globalOperatingClass
     self.channelCfi = channelCfi
-      
-class FrequencyRange:
-  def __init__(self, lowFrequency, highFrequency):
-    self.lowFrequency = lowFrequency
-    self.highFrequency = highFrequency
     
 class Vector:
   def __init__(self, length, angle):
