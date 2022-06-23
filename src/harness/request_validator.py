@@ -223,7 +223,7 @@ def deviceDescriptor_is_valid(deviceDescriptor, log_file):
                                     log_file):
       is_valid = False
   else:
-      is_valid = False
+    is_valid = False
 
   if item_is_readable(deviceDescriptor, 'rulesetIds', log_file):
     if not rulesetIds_is_valid(deviceDescriptor['rulesetIds'], log_file):
@@ -287,7 +287,7 @@ def ellipse_is_valid(ellipse, log_file):
       is_valid = False
     elif ellipse['majorAxis'] < 0:
       log_message = '\nmajorAxis must be a positive integer: ' + \
-                    str(majorAxis) + '\n'
+                    str(ellipse['majorAxis']) + '\n'
       log(log_message, log_file)
       is_valid = False
 
@@ -296,7 +296,7 @@ def ellipse_is_valid(ellipse, log_file):
       is_valid = False
     elif ellipse['minorAxis'] < 0:
       log_message = '\nminorAxis must be a positive integer: ' + \
-                    str(minorAxis) + '\n'
+                    str(ellipse['minorAxis']) + '\n'
       log(log_message, log_file)
       is_valid = False
 
@@ -306,10 +306,10 @@ def ellipse_is_valid(ellipse, log_file):
       is_valid = False
     elif ellipse['orientation'] < 0 or ellipse['orientation'] > 180:
       log_message = '\norientation value is outside of 0-180: ' + \
-                    str(orientation) + '\n'
+                    str(ellipse['orientation']) + '\n'
       log(log_message, log_file)
 
-    return is_valid
+  return is_valid
 
 
 def frequencyRange_is_valid(frequencyRange, log_file):
@@ -483,7 +483,7 @@ def point_is_valid(point, log_file):
       is_valid = False
     elif point['longitude'] < -180 or point['longitude'] > 180:
       log_message = '\nlongitude is outside of -180..180: ' + \
-                    str(longitude) + '\n'
+                    str(point['longitude']) + '\n'
       log(log_message, log_file)
       is_valid = False
   else:
@@ -494,7 +494,7 @@ def point_is_valid(point, log_file):
       is_valid = False
     elif point['latitude'] < -90 or point['latitude'] > 90:
       log_message = '\nlatitude is outside of -90..90: ' + \
-                    str(latitude) + '\n'
+                    str(point['latitude']) + '\n'
       log(log_message, log_file)
       is_valid = False
   else:
@@ -665,5 +665,5 @@ def main():
   else:
     print('\n*** Errors found ***\nPlease see log file: ' + log_file)
 
-
-#main()
+if __name__ == "__main__":
+  main()
