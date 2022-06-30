@@ -51,7 +51,7 @@ class AfcImpl(afc_interface.AfcInterface):
   def SpectrumInquiry(self, request, ssl_cert=None, ssl_key=None):
     return self._SpdRequest('availablespectruminquiryrequest', request, ssl_cert, ssl_key)
 
- 
+
   def _SpdRequest(self, method_name, request, ssl_cert=None, ssl_key=None):
     return RequestPost('http://%s/%s' % (self.spd_afc_base_url,
                                              method_name), request,
@@ -73,16 +73,14 @@ class AfcAdminImpl(afc_interface.AfcAdminInterface):
     RequestPost('https://%s/admin/reset' % self._base_url, None,
                 self._tls_config)
 
- 
+
   def InjectFs(self, request):
     RequestPost('https://%s/admin/injectdata/fs' % self._base_url, request,
                 self._tls_config)
 
-  
+
   def _GetDefaultAdminSSLCertPath(self):
     return os.path.join('certs', 'admin.cert')
 
   def _GetDefaultAdminSSLKeyPath(self):
     return os.path.join('certs', 'admin.key')
-
- 

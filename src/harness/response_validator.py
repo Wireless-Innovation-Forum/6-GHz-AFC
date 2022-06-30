@@ -21,6 +21,5 @@ def validate_response(test, response, flog):
   # and return True if the response passes, else False.
 
   print('  Analyzing SUT response to ' + test)
-  
-  return True
 
+  return True

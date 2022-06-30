@@ -21,7 +21,7 @@ and multiprocessing pool for best performance
 import afc
 import json
 
-  
+
 print ("running tests")
 with open('request_sample.txt') as f:
   request_sample = json.loads(f.read())
@@ -30,5 +30,3 @@ afc_protocol, afc_admin_interface = afc.GetTestingAfc()
 
 received_response = afc_protocol.SpectrumInquiry(request_sample)
 print ("\nResponse : ", received_response)
-
- 

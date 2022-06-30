@@ -23,7 +23,7 @@ import six
 class AfcInterface(six.with_metaclass(abc.ABCMeta, object)):
   """WinnForum standardized interfaces.
 
-  Includes AFC-SPD interface 
+  Includes AFC-SPD interface
 
   """
 
@@ -49,7 +49,7 @@ class AfcInterface(six.with_metaclass(abc.ABCMeta, object)):
     """
     pass
 
-  
+
 class AfcAdminInterface(six.with_metaclass(abc.ABCMeta, object)):
   """Minimal test control interface for the AFC under test."""
 
@@ -65,7 +65,6 @@ class AfcAdminInterface(six.with_metaclass(abc.ABCMeta, object)):
     """AFC admin interface to inject FS information into AFC under test.
 
     Args:
-        request: a fixed service receiver object.
+      request: a fixed service receiver object.
     """
     pass
-

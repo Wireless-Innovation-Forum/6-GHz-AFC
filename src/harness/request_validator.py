@@ -62,21 +62,21 @@ def availableSpectrumInquiryRequestMessage_is_valid(request, log_file=''):
       is_valid = False
   else:
     is_valid = False
-  
+
   return is_valid
 
-  
+
 def availableSpectrumInquiryRequests_is_valid(request, log_file=''):
 
   if DEBUG:
     print(inspect.currentframe().f_code.co_name)
 
   global requestIds
-  
+
   is_valid = True
 
   number_of_requests = 0
-  
+
   for availableSpectrumInquiryRequest in request:
 
     number_of_requests += 1
@@ -144,7 +144,7 @@ def certificationId_is_valid(certificationId, log_file):
     print(inspect.currentframe().f_code.co_name)
 
   allowed_nras = ['FCC']
-  
+
   is_valid = True
 
   if not item_is_readable(certificationId, 'nra', log_file):
@@ -170,14 +170,14 @@ def certificationIds_is_valid(certificationIds, log_file):
     print(inspect.currentframe().f_code.co_name)
 
   is_valid = True
-  
+
   if not type_is_correct(certificationIds, 'certificationId', 'list', log_file):
     is_valid = False
   else:
     for certificationId in certificationIds:
       if not certificationId_is_valid(certificationId, log_file):
         is_valid = False
-  
+
   return is_valid
 
 
@@ -230,7 +230,7 @@ def deviceDescriptor_is_valid(deviceDescriptor, log_file):
       is_valid = False
   else:
     is_valid = False
-    
+
   return is_valid
 
 
@@ -238,11 +238,11 @@ def elevation_is_valid(elevation, log_file):
 
   if DEBUG:
     print(inspect.currentframe().f_code.co_name)
-  
+
   is_valid = True
 
   allowed_heightTypes = ['AGL', 'AMSL']
-  
+
   if item_is_readable(elevation, 'height', log_file):
     if not type_is_correct(elevation['height'], 'height', 'number', log_file):
       is_valid = False
@@ -275,7 +275,7 @@ def ellipse_is_valid(ellipse, log_file):
 
   if DEBUG:
     print(inspect.currentframe().f_code.co_name)
-  
+
   is_valid = True
 
   if item_is_readable(ellipse, 'center', log_file):
@@ -372,7 +372,7 @@ def inquiredFrequencyRange_is_valid(inquiredFrequencyRange, log_file):
       is_valid = False
   else:
     is_valid = False
-    
+
   return is_valid
 
 
@@ -382,7 +382,7 @@ def item_is_readable(request, item, log_file='', print_to_stdout=True):
     print(inspect.currentframe().f_code.co_name)
 
   is_valid = True
-  
+
   try:
     temp = request[item]
   except:
@@ -408,7 +408,7 @@ def location_is_valid(location, log_file):
 
   if DEBUG:
     print(inspect.currentframe().f_code.co_name)
-  
+
   is_valid = True
 
   # Exactly one of ellipse, linearPolygon, or radialPolygon must be present
@@ -453,7 +453,7 @@ def location_is_valid(location, log_file):
       is_valid = False
   else:
     is_valid = False
-    
+
   return is_valid
 
 
@@ -475,7 +475,7 @@ def point_is_valid(point, log_file):
 
   if DEBUG:
     print(inspect.currentframe().f_code.co_name)
-  
+
   is_valid = True
 
   if item_is_readable(point, 'longitude', log_file):
@@ -499,7 +499,7 @@ def point_is_valid(point, log_file):
       is_valid = False
   else:
     is_valid = False
-  
+
   return is_valid
 
 
@@ -518,7 +518,7 @@ def requestId_is_valid(requestId, log_file):
 
   if DEBUG:
     print(inspect.currentframe().f_code.co_name)
-  
+
   if not type_is_correct(requestId, 'requestId', 'str', log_file):
     return False
   else:
@@ -533,7 +533,7 @@ def rulesetIds_is_valid(rulesetIds, log_file):
   is_valid = True
 
   valid_rulesetIds = ['US_47_CFR_PART_15_SUBPART_E']
-  
+
   if type_is_correct(rulesetIds, 'rulesetIds', 'list', log_file):
     for rulesetId in rulesetIds:
       if rulesetId not in valid_rulesetIds:
@@ -545,7 +545,7 @@ def rulesetIds_is_valid(rulesetIds, log_file):
 
   return is_valid
 
-  
+
 def serialNumber_is_valid(serialNumber, log_file):
 
   if DEBUG:
@@ -561,7 +561,7 @@ def type_is_correct(variable, variable_name, expected_type, log_file):
 
   if DEBUG:
     print(inspect.currentframe().f_code.co_name)
-  
+
   if expected_type == 'str':
     if type(variable) != str:
       log_message = '\n' + variable_name + ' is not of type string: ' \
@@ -599,7 +599,7 @@ def type_is_correct(variable, variable_name, expected_type, log_file):
       log_message = '\n' + variable_name + ' is not of type list: ' \
                     + str(variable) + '\n'
       log(log_message, log_file)
-      return False    
+      return False
     else:
       return True
   else:
@@ -612,7 +612,7 @@ def version_is_valid(version, log_file):
 
   if DEBUG:
     print(inspect.currentframe().f_code.co_name)
-    
+
   allowed_versions = ['1.1']
 
   is_valid = True
@@ -626,10 +626,10 @@ def version_is_valid(version, log_file):
       is_valid = False
   else:
     is_valid = False
-    
+
   return is_valid
 
-  
+
 def main():
 
   if DEBUG:
@@ -642,7 +642,7 @@ def main():
   log_file = in_file + '_log.txt'
 
   is_valid = True
-  
+
   if not os.path.exists(in_file):
     log_message = '\nFile does not exist: ' + in_file + '\n'
     log(log_message, log_file)
@@ -655,7 +655,7 @@ def main():
       log_message = '\nFile not parsable as JSON: ' + in_file + '\n'
       log(log_message, log_file)
       is_valid = False
-    
+
   if is_valid:
     if availableSpectrumInquiryRequestMessage_is_valid(request, log_file):
       log_message = 'No errors found in ' + in_file

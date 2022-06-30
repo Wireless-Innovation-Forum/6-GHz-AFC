@@ -78,17 +78,17 @@ for inquiry in tests_to_run:
     afc_protocol, afc_admin_interface = afc.GetTestingAfc()
     print('  Submitting ' + inquiry + ' to SUT')
     response = afc_protocol.SpectrumInquiry(request_sample)
-    
+
     # Write the response to a stand-alone text file
     fresponse = open(responsefile, 'w')
     fresponse.write(json.dumps(response))
     fresponse.close()
-    
+
     # Also append response to the log file
     flog = open(logfile, 'a')
     flog.write('**** Response:\n')
     flog.write(json.dumps(response))
-    
+
     # Analyze/validate the response (format and compliance with mask)
     print('  SUT passes mask test: ' +
           str(validate_response(inquiry, response, flog)))
@@ -98,4 +98,3 @@ for inquiry in tests_to_run:
     print('  >> See log file for errors')
 
   flog.close()
-
