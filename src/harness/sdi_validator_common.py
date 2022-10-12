@@ -152,7 +152,7 @@ class SDIValidatorBase:
     is_valid = True
     # Require frequency order to be correct
     try:
-      if freq_range.highFrequency < freq_range.lowFrequency:
+      if freq_range.highFrequency <= freq_range.lowFrequency:
         is_valid = False
         self._warning(f'highFreqency ({freq_range.highFrequency}) should '
                       f'be greater than lowFrequency ({freq_range.lowFrequency})')
