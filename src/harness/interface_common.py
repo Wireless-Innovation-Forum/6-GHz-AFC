@@ -20,11 +20,30 @@ from typing import Any
 class FrequencyRange:
   """Frequency Range specification for spectrum availabilty requests and responses
 
+  Ranges run from lowFrequency (inclusive) up to but not including highFrequency,
+  that is: the range [lowFrequency, highFrequency). Current SDI spec (v1.3) does not specify
+  this interpretation, but it is implied by the spec's sample_response (contiguous frequency
+  ranges sharing a high/low freq value)
+
   Attributes:
     lowFrequency: lowest frequency in the range, expressed in MHz
     highFrequency: highest frequency in the range, expressed in MHz"""
   lowFrequency: int
   highFrequency: int
+
+  def overlaps(self, other: 'FrequencyRange'):
+    """Determines if two FrequencyRange objects define overlapping ranges
+
+    Per current interpretation of SDI spec, a range with a high frequency of X does not overlap a
+    range with low frequency of X
+
+    Parameters:
+      other (FrequencyRange): Other range to check for overlap
+
+    Returns:
+      True if ranges overlap (At least one range endpoint is contained within the other range
+      False otherwise"""
+    return self.lowFrequency < other.highFrequency and other.lowFrequency < self.highFrequency
 
   def __str__(self):
     return f"lowFrequency: {self.lowFrequency}\nhighFrequency: {self.highFrequency}"
