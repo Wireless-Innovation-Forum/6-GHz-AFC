@@ -14,6 +14,7 @@
 """AFC System to AFC Device Interface Common Classes - SDI v1.3"""
 
 from dataclasses import dataclass
+from typing import Any
 
 @dataclass
 class FrequencyRange:
@@ -27,6 +28,18 @@ class FrequencyRange:
 
   def __str__(self):
     return f"lowFrequency: {self.lowFrequency}\nhighFrequency: {self.highFrequency}"
+
+@dataclass
+class VendorExtension:
+  """Standard Vendor Extension Interface
+
+  Attributes:
+    extensionId: Identifies the vendor and field type of an extension
+    parameters: The payload as specified by the extension corresponding
+      to extensionId
+  """
+  extensionId: str
+  parameters: Any
 
 def init_from_dicts(dicts: list[dict], cls):
   """Converts all dicts in a list to the specified type

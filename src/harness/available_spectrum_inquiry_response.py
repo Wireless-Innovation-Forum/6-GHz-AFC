@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from typing import Any, Union
 from contextlib import suppress
 
-from interface_common import FrequencyRange, init_from_dicts
+from interface_common import FrequencyRange, VendorExtension, init_from_dicts
 
 @enum.unique
 class ResponseCode(enum.Enum):
@@ -176,18 +176,6 @@ class AvailableChannelInfo:
     return (f"globalOperatingClass: {self.globalOperatingClass}" +
         f"\nchannelCfi: {self.channelCfi}" +
         f"\nmaxEirp: {self.maxEirp}")
-
-@dataclass
-class VendorExtension:
-  """Standard Vendor Extension Interface
-
-  Attributes:
-    extensionId: Identifies the vendor and field type of an extension
-    parameters: The payload as specified by the extension corresponding
-      to extensionId
-  """
-  extensionId: str
-  parameters: Any
 
 @dataclass
 class AvailableSpectrumInquiryResponse:

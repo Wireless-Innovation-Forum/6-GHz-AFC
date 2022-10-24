@@ -18,7 +18,6 @@ validation does not stop on the first failure, but will report all
 observed failures. Multiple failures may be reported for the same
 root cause."""
 
-import re
 import math
 from datetime import datetime
 
@@ -105,7 +104,7 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
 
   @sdi_validate.common_sdi_validator
   def validate_available_frequency_info(self, info: afc_resp.AvailableFrequencyInfo):
-    """Validates that a AvailableFrequencyInfo object satisfies the SDI spec
+    """Validates that an AvailableFrequencyInfo object satisfies the SDI spec
 
     Checks:
       frequencyRange is valid
@@ -128,7 +127,7 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
 
   @sdi_validate.common_sdi_validator
   def validate_available_channel_info(self, info: afc_resp.AvailableChannelInfo):
-    """Validates that a AvailableChannelInfo object satisfies the SDI spec
+    """Validates that an AvailableChannelInfo object satisfies the SDI spec
 
     Checks:
       channelCfi and maxEirp must have equal lengths
@@ -176,23 +175,9 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
     return is_valid
 
   @sdi_validate.common_sdi_validator
-  def validate_vendor_extension(self, ext: afc_resp.VendorExtension):
-    """Validates that a VendorExtension object satisfies the SDI spec
-
-    Checks:
-      No additional checks beyond the common type checks
-
-    Parameters:
-      ext (VendorExtension): VendorExtension to be validated
-
-    Returns:
-      True always"""
-    return True
-
-  @sdi_validate.common_sdi_validator
   def validate_available_spectrum_inquiry_response(self,
         resp: afc_resp.AvailableSpectrumInquiryResponse):
-    """Validates that a AvailableSpectrumInquiryResponse object satisfies the SDI spec
+    """Validates that an AvailableSpectrumInquiryResponse object satisfies the SDI spec
 
     Checks:
       response (code, description, supplemental info) is valid
@@ -239,7 +224,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
         is_valid = False
     if resp.availableChannelInfo is not None:
       try:
-        is_valid &= all(self.validate_available_channel_info(x) for x in resp.availableChannelInfo)
+        is_valid &= all([self.validate_available_channel_info(x)
+                         for x in resp.availableChannelInfo])
       except TypeError as ex:
         self._warning(f'Exception caught validating channel info: {ex}')
         is_valid = False
@@ -252,18 +238,13 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
       except(ValueError, IndexError, TypeError):
         self._warning(f'availabilityExpireTime has invalid format: {resp.availabilityExpireTime}')
         is_valid = False
-    if resp.vendorExtensions is not None:
-      try:
-        is_valid &= all(self.validate_vendor_extension(x) for x in resp.vendorExtensions)
-      except TypeError as ex:
-        self._warning(f'Exception caught validating vendor extensions: {ex}')
-        is_valid = False
+    is_valid &= self.validate_vendor_extension_list(resp.vendorExtensions)
     return is_valid
 
   @sdi_validate.common_sdi_validator
   def validate_available_spectrum_inquiry_response_message(self,
         msg: afc_resp.AvailableSpectrumInquiryResponseMessage):
-    """Validates that a AvailableSpectrumInquiryResponseMessage object satisfies the SDI spec
+    """Validates that an AvailableSpectrumInquiryResponseMessage object satisfies the SDI spec
 
     Checks:
       version string is valid
@@ -277,14 +258,7 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
     Returns:
       True if all checks are satisfied
       False otherwise"""
-    is_valid = True
-    try:
-      if re.match("\\A[0-9]+\\.[0-9]+\\Z", msg.version) is None:
-        is_valid = False
-        self._warning(f'Invalid version string format: {msg.version}')
-    except TypeError:
-      is_valid = False
-      self._warning(f'Could not parse version string: {msg.version}')
+    is_valid = self.validate_version(msg.version)
     try:
       if len(msg.availableSpectrumInquiryResponses) < 1:
         is_valid = False
@@ -303,14 +277,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
     except (TypeError, AttributeError) as ex:
       is_valid = False
       self._warning(f'Exception caught validating responses: {ex}')
-    if msg.vendorExtensions is not None:
-      try:
-        is_valid &= all(self.validate_vendor_extension(x) for x in msg.vendorExtensions)
-      except TypeError as ex:
-        is_valid = False
-        self._warning(f'Exception caught validating responses: {ex}')
+    is_valid &= self.validate_vendor_extension_list(msg.vendorExtensions)
     return is_valid
-
 
 def main():
   """Demonstrates use of the validator functions"""
@@ -322,16 +290,16 @@ def main():
   with open('src/harness/response_sample.json', encoding="UTF-8") as sample_file:
     sample_json = json.load(sample_file)
     sample_conv = afc_resp.AvailableSpectrumInquiryResponseMessage(**sample_json)
-    print(f'Example response is valid: '
-          f'{validator.validate_available_spectrum_inquiry_response_message(sample_conv)}')
+    print('Example response is valid: '
+         f'{validator.validate_available_spectrum_inquiry_response_message(sample_conv)}')
     sample_conv.availableSpectrumInquiryResponses[0].response.responseCode = 0
-    print(f'Integer can be used instead of ResponseCode enum: '
-          f'{validator.validate_available_spectrum_inquiry_response_message(sample_conv)}')
+    print('Integer can be used instead of ResponseCode enum: '
+         f'{validator.validate_available_spectrum_inquiry_response_message(sample_conv)}')
 
-    print(f'Can validate sub-fields with JSON dict directly: '
-          f'{validator.validate_available_spectrum_inquiry_response(sample_json["availableSpectrumInquiryResponses"][0])}')
-    print(f'Can validate root message with JSON dict directly: '
-          f'{validator.validate_available_spectrum_inquiry_response_message(sample_json)}')
+    print('Can validate sub-fields with JSON dict directly: '
+         f'{validator.validate_available_spectrum_inquiry_response(sample_json["availableSpectrumInquiryResponses"][0])}')
+    print('Can validate root message with JSON dict directly: '
+         f'{validator.validate_available_spectrum_inquiry_response_message(sample_json)}')
     sample_conv.availableSpectrumInquiryResponses = []
     empty_list_is_valid = validator.validate_available_spectrum_inquiry_response_message(sample_conv)
     print('^Errors logged to console by default logger config^')

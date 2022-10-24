@@ -18,10 +18,12 @@ validation does not stop on the first failure, but will report all
 observed failures"""
 
 import logging
+import re
 import typing
 import dataclasses
+from typing import List
 
-from interface_common import FrequencyRange
+from interface_common import FrequencyRange, VendorExtension
 
 def is_list_of_type(val, subtype):
   """Checks if value is a list containing only members of the specified type
@@ -160,4 +162,61 @@ class SDIValidatorBase:
       is_valid = False
       self._warning(f'Could not ensure correct ordering in frequency '
                     f'range (low: {freq_range.lowFrequency} high: {freq_range.highFrequency}: {ex}')
+    return is_valid
+
+  @common_sdi_validator
+  def validate_vendor_extension(self, ext: VendorExtension):
+    """Validates that a VendorExtension object satisfies the SDI spec
+
+    Checks:
+      No additional checks beyond the common type checks
+
+    Parameters:
+      ext (VendorExtension): VendorExtension to be validated
+
+    Returns:
+      True always"""
+    return True
+
+  def validate_version(self, version: str):
+    """Validates a version string
+
+    Checks:
+      version must be of format n.m where n and m are non-negative integers
+
+    Parameters:
+      version (string): version string to be validated
+
+    Returns:
+      True if version string is valid
+      False otherwise"""
+    is_valid = True
+    try:
+      if re.match("\\A[0-9]+\\.[0-9]+\\Z", version) is None:
+        is_valid = False
+        self._warning(f'Invalid version string format: {version}')
+    except TypeError:
+      is_valid = False
+      self._warning(f'Could not parse version string: {version}')
+    return is_valid
+
+  def validate_vendor_extension_list(self, exts: List[VendorExtension]):
+    """Dispatches list of extensions to validate_vendor_extension
+
+    Checks:
+      All contained vendor extensions are valid
+
+    Parameters:
+      exts (List[VendorExtension]): list of VendorExtensions to be validated
+
+    Returns:
+      True if all are valid
+      False otherwise"""
+    is_valid = True
+    if exts is not None:
+      try:
+        is_valid &= all([self.validate_vendor_extension(x) for x in exts])
+      except TypeError as ex:
+        self._warning(f'Exception caught validating vendor extensions: {ex}')
+        is_valid = False
     return is_valid
