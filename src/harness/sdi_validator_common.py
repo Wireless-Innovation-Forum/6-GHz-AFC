@@ -17,11 +17,11 @@ Validation functions will exhaustively test all fields (i.e.,
 validation does not stop on the first failure, but will report all
 observed failures"""
 
-import logging
 import re
 import typing
 import dataclasses
 from typing import List
+from test_harness_logging import TestHarnessLogger
 
 from interface_common import FrequencyRange, VendorExtension
 
@@ -57,32 +57,15 @@ def common_sdi_validator(specific_logic):
     return False
   return wrapper
 
-class SDIValidatorBase:
+class SDIValidatorBase(TestHarnessLogger):
   """Shared validation functionality
 
   Manages how violations are logged
   Validates shared SDI message types
   Provides common functionality"""
 
-  echo_log: bool
-  _logger: logging.Logger = None
-  _log_file: str = None
-
-  def __init__(self, logger=None, echo_log=False):
-    if isinstance(logger, str):
-      self._log_file = str
-    elif isinstance(logger, logging.Logger):
-      self._logger = logger
-    self.echo_log = echo_log
-
-  def _warning(self, msg):
-    if self._logger is not None:
-      self._logger.warning(msg)
-    if self._log_file is not None:
-      with open(self._log_file, 'a', encoding='utf-8') as flog:
-        flog.write(msg +'\n')
-    if self.echo_log:
-      print(msg)
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
 
   def get_as_type(self, src_obj, target_type):
     """Attempts to convert a dictionary to a specified type
