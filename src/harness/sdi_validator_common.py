@@ -64,6 +64,8 @@ class SDIValidatorBase(TestHarnessLogger):
   Validates shared SDI message types
   Provides common functionality"""
 
+  _supported_versions = ["1.3"]
+
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
 
@@ -181,6 +183,11 @@ class SDIValidatorBase(TestHarnessLogger):
     except TypeError:
       is_valid = False
       self._warning(f'Could not parse version string: {version}')
+
+    if is_valid and version not in self._supported_versions:
+      self._warning(f'Message version ({version}) is not in list of supported versions '
+                    f'({self._supported_versions}). Errors in validation and comparison may '
+                     'result.')
     return is_valid
 
   def validate_vendor_extension_list(self, exts: List[VendorExtension]):
