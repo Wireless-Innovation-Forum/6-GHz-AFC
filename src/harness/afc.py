@@ -49,7 +49,7 @@ class AfcImpl(afc_interface.AfcInterface):
     self._tls_config = TlsConfig()
 
   def SpectrumInquiry(self, request, ssl_cert=None, ssl_key=None):
-    return self._SpdRequest('availablespectruminquiryrequest', request, ssl_cert, ssl_key)
+    return self._SpdRequest('availableSpectrumInquiry', request, ssl_cert, ssl_key)
 
 
   def _SpdRequest(self, method_name, request, ssl_cert=None, ssl_key=None):

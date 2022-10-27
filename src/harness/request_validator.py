@@ -301,7 +301,7 @@ def ellipse_is_valid(ellipse, log_file):
       is_valid = False
 
   if item_is_readable(ellipse, 'orientation', log_file):
-    if not type_is_correct(ellipse['orientation'], 'orientation', 'float',
+    if not type_is_correct(ellipse['orientation'], 'orientation', 'number',
                            log_file):
       is_valid = False
     elif ellipse['orientation'] < 0 or ellipse['orientation'] > 180:
