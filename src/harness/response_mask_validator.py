@@ -16,7 +16,10 @@
 Validation functions will exhaustively test all fields (i.e.,
 validation does not stop on the first failure, but will report all
 observed failures. Multiple failures may be reported for the same
-root cause."""
+root cause.
+
+For this reason, list comprehensions are (usually) preferred over
+generators in any/all statements to avoid short-circuit evaluation"""
 
 from math import isnan
 import expected_inquiry_response as afc_exp
@@ -51,20 +54,24 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
     is_valid = True
 
     try:
+      # Values cannot be NaN
       for field_name, _ in pow_range.__dataclass_fields__.items():
         field_value = getattr(pow_range, field_name)
         if field_value is not None and isnan(field_value):
           is_valid = False
           self._warning(f'Value for {field_name} cannot be NaN')
 
+      # Require lowerBound <= upperBound
       if pow_range.lowerBound is not None and pow_range.lowerBound > pow_range.upperBound:
         is_valid = False
         self._warning(f'Lower bound of power range ({pow_range.lowerBound}) must be less than '
                       f'or equal to upper bound ({pow_range.upperBound})')
+      # Require nominalValue <= upperBound
       if pow_range.nominalValue is not None and pow_range.nominalValue > pow_range.upperBound:
         is_valid = False
         self._warning(f'Nominal value of power range ({pow_range.nominalValue}) must be less than '
                       f'or equal to upper bound ({pow_range.upperBound})')
+      # Require lowerBound <= nominalValue
       if (pow_range.nominalValue is not None and pow_range.lowerBound is not None
           and pow_range.lowerBound > pow_range.nominalValue):
         is_valid = False

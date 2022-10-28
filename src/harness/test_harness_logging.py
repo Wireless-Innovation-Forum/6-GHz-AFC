@@ -37,10 +37,7 @@ def auto_run_non_python_logging(logging_func):
 class ConsoleInfoModuleFilter(logging.Filter):
   """Logging filter that only permits level INFO if the message is from the main function"""
   def filter(self, record: logging.LogRecord):
-    if record.levelno != logging.INFO or record.funcName == 'main':
-      return True
-    else:
-      return False
+    return record.levelno != logging.INFO or record.funcName == 'main'
 
 class TestHarnessLogger:
   """Base class for handling various logging implementations
