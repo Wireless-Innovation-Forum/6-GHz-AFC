@@ -126,7 +126,7 @@ def _Request(url, request, config, is_post_method):
   conn.setopt(
       conn.VERBOSE,
       3  # Improve readability.
-      if logging.getLogger().isEnabledFor(logging.DEBUG) else False)
+      if logging.getLogger(__name__).isEnabledFor(logging.DEBUG) else False)
   conn.setopt(conn.SSLVERSION, config.ssl_version)
   conn.setopt(conn.SSLCERTTYPE, 'PEM')
   conn.setopt(conn.SSLCERT, config.client_cert)
@@ -139,9 +139,9 @@ def _Request(url, request, config, is_post_method):
   if is_post_method:
     conn.setopt(conn.POST, True)
     conn.setopt(conn.POSTFIELDS, request)
-    logging.info('POST Request to URL %s :\n%s', url, request)
+    logging.getLogger(__name__).info('POST Request to URL %s :\n%s', url, request)
   else:
-    logging.info('GET Request to URL %s', url)
+    logging.getLogger(__name__).info('GET Request to URL %s', url)
 
   error = None
   for attempt_count in range(MAX_REQUEST_ATTEMPT_COUNT):
@@ -152,21 +152,21 @@ def _Request(url, request, config, is_post_method):
       # e contains a tuple (libcurl_error_code, string_description).
       # See https://curl.haxx.se/libcurl/c/libcurl-errors.html
       error = e
-      logging.warning(str(CurlError(e.args[1], e.args[0])))
+      logging.getLogger(__name__).warning(str(CurlError(e.args[1], e.args[0])))
       time.sleep(REQUEST_ATTEMPT_DELAY_SECOND)
     except Exception as e:
       error = e
-      logging.warning(str(e))
+      logging.getLogger(__name__).warning(str(e))
       time.sleep(REQUEST_ATTEMPT_DELAY_SECOND)
 
   if error:
-    logging.error('Connection to Host Failed after %d attempts' %MAX_REQUEST_ATTEMPT_COUNT)
+    logging.getLogger(__name__).error('Connection to Host Failed after %d attempts' %MAX_REQUEST_ATTEMPT_COUNT)
     raise error
 
   http_code = conn.getinfo(pycurl.HTTP_CODE)
   conn.close()
   body = response.getvalue().decode('utf-8')
-  logging.info('Response:\n' + body)
+  logging.getLogger(__name__).info('Response:\n' + body)
 
   if not (200 <= http_code <= 299):
     raise HTTPError(http_code)
