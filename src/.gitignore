@@ -3,5 +3,6 @@
 harness/logs
 !harness/logs/README.md
 harness/responses/*.json
-# Temporarily suppress pushing inquiries while test vectors are under development
+# Temporarily suppress pushing inquiries and masks while test vectors are under development
 harness/inquiries/*.json
+harness/masks/*.json
