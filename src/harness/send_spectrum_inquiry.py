@@ -23,7 +23,7 @@ import json
 
 
 print ("running tests")
-with open('request_sample.txt') as f:
+with open('request_sample.json') as f:
   request_sample = json.loads(f.read())
 print ("Request_sample : ", request_sample)
 afc_protocol, afc_admin_interface = afc.GetTestingAfc()
