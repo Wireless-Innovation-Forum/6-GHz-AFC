@@ -1,47 +1,57 @@
- {
-    "version": "1.0",
-    "availableSpectrumInquiryRequests": [
-      {
-        "requestId": "11235813",
-        "deviceDescriptor": {
-          "serialNumber": "ABCDEFG",
-          "certificationId": {
-            "nra": [
-              "FCC"
-            ],
-            "id": [
-              "EFGHIJK"
-            ]
-          },
-          "rulesetIds": [
-            "US_47_CFR_PART_15_SUBPART_E"
-          ]
-        },
-        "location": {
-          "ellipse": {
-            "center": {
-              "longitude": -122.984157,
-              "latitude": 37.425056
-            },
-            "majorAxis": 100,
-            "minorAxis": 50,
-            "orientation": 70
-          },
-          "elevation": {
-            "height": 3,
-            "heightType": "AGL",
-            "verticalUncertainty": 2
-          },
-          "indoorDeployment": 2
-        },
-        "inquiredChannels": [
+{
+  "version": "1.3",
+  "availableSpectrumInquiryRequests": [
+    {
+      "requestId": "11235813",
+      "deviceDescriptor": {
+        "serialNumber": "ABCDEFG",
+        "certificationId": [
           {
-            "globalOperatingClass": 131,
-            "channelCfi": [
-              129
-            ]
+            "nra": "FCC",
+            "id": "EFGHIJK"
           }
+        ],
+        "rulesetIds": [
+          "US_47_CFR_PART_15_SUBPART_E"
         ]
-      }
-    ]
-  }
+      },
+      "location": {
+        "ellipse": {
+          "center": {
+            "longitude": -122.984157,
+            "latitude": 37.425056
+          },
+          "majorAxis": 100,
+          "minorAxis": 50,
+          "orientation": 70
+        },
+        "elevation": {
+          "height": 3.0,
+          "heightType": "AGL",
+          "verticalUncertainty": 2
+        },
+        "indoorDeployment": 2
+      },
+      "inquiredFrequencyRange": [
+        {
+          "lowFrequency": 5925,
+          "highFrequency": 6425
+        }
+      ],
+      "inquiredChannels": [
+        {
+          "globalOperatingClass": 133
+        },
+        {
+          "globalOperatingClass": 134,
+          "channelCfi": [
+            15,
+            47,
+            79
+          ]
+        }
+      ],
+      "minDesiredPower": 24
+    }
+  ]
+}

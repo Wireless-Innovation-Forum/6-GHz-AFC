@@ -34,7 +34,25 @@ def auto_run_non_python_logging(logging_func):
     args[0]._console_log(final_msg)
   return wrapper
 
+class ConsoleInfoModuleFilter(logging.Filter):
+  """Logging filter that only permits level INFO if the message is from the main function"""
+  def filter(self, record: logging.LogRecord):
+    if record.levelno != logging.INFO or record.funcName == 'main':
+      return True
+    else:
+      return False
+
 class TestHarnessLogger:
+  """Base class for handling various logging implementations
+
+  Can use python logging framework (recommended), a log file, or echo to the console.
+  Introduced originally before rest of harness code used the logging framework.
+  May be revised/removed in future releases, depending on how the logging structure evolves.
+
+  Properties:
+    echo_log (bool): Enable echoing long messages to the console
+    append_msg_level (bool): Includes the message level in console and log file output
+                             Has no effect on logging framework output"""
   echo_log: bool
   append_msg_level: bool
   _logger: logging.Logger = None
@@ -52,7 +70,7 @@ class TestHarnessLogger:
   def _fatal(self, msg):
     if self._logger is not None:
       self._logger.fatal(msg)
-  
+
   @auto_run_non_python_logging
   def _error(self, msg):
     if self._logger is not None:

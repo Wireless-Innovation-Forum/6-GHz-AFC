@@ -12,658 +12,596 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-# Validates a text file containing a spectrum inquiry request in the WFA
-# standard format. Checks:
-#
-#   File is parsable as json text
-#   Valid interface version
-#   The existence of a readable version all required elements
-#   Each input data value is of the proper type
-#   Each requestId (if more than one) is unique within the message
-#
-# Errors are logged to a file and echoed to the screen.
-#
-# Vendor extensions are not checked.
-#
-# TODO:
-#   linearPolygon_is_valid
-#   radialPolygon_is_valid
+"""AFC Spectrum Inquiry Request Validation - SDI v1.3
 
-import datetime
+Validates a text file containing a spectrum inquiry request in the WFA
+standard format. Checks:
+
+  File is parsable as json text
+  Valid interface version
+  The existence of a readable version of all required elements
+  Each input data value is of the proper type
+  Each requestId (if more than one) is unique within the message
+
+Vendor extensions are not checked.
+
+TODO:
+  linearPolygon_is_valid
+  radialPolygon_is_valid"""
+
 import inspect
-import json
-import os
+
+import sdi_validator_common as sdi_validate
+from interface_common import FrequencyRange
 
 DEBUG = False
-requestIds = []
 
+class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
+  """Provides validation functions for AFC Inquiry-specific types"""
 
-def availableSpectrumInquiryRequestMessage_is_valid(request, log_file=''):
+  def validate_available_spectrum_inquiry_response_message(self, request):
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
 
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
+    is_valid = True
 
-  if log_file != '':
-    f = open(log_file, 'a')
-    # f.write(str(datetime.datetime.now()) + '\n')
-    f.close()
-
-  is_valid = True
-
-  if item_is_readable(request, 'version', log_file):
-    if not version_is_valid(request['version'], log_file):
+    if self.item_is_readable(request, 'version'):
+      if self.get_as_type(request['version'], str) is not None:
+        is_valid &= self.validate_version(request['version'])
+      else:
+        is_valid = False
+    else:
       is_valid = False
-  else:
-    is_valid = False
 
-  if item_is_readable(request, 'availableSpectrumInquiryRequests', log_file):
-    if not availableSpectrumInquiryRequests_is_valid(
-      request['availableSpectrumInquiryRequests'], log_file):
+    if self.item_is_readable(request, 'availableSpectrumInquiryRequests'):
+      if not self.validate_available_spectrum_inquiry_requests(
+                  request['availableSpectrumInquiryRequests']):
+        is_valid = False
+
+      request_ids = []
+      for request in request['availableSpectrumInquiryRequests']:
+        # Check item as optional to prevent double logging error
+        # (already logged by validate_requests)
+        if self.item_is_readable(request, 'requestId', item_is_required=False):
+          request_ids.append(request['requestId'])
+      if len(request_ids) != len(list(set(request_ids))):
+        is_valid = False
+        self._warning('Request message contains duplicate requestIDs. '
+                     f'All requestIDs: {request_ids}')
+    else:
       is_valid = False
-  else:
-    is_valid = False
 
-  return is_valid
+    return is_valid
 
+  def validate_available_spectrum_inquiry_requests(self, request):
 
-def availableSpectrumInquiryRequests_is_valid(request, log_file=''):
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
 
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
+    is_valid = True
 
-  global requestIds
+    number_of_requests = 0
 
-  is_valid = True
+    for availableSpectrumInquiryRequest in request:
 
-  number_of_requests = 0
+      number_of_requests += 1
+      if self.item_is_readable(availableSpectrumInquiryRequest, 'requestId'):
+        if not self.validate_request_id(availableSpectrumInquiryRequest['requestId']):
+          is_valid = False
+      else:
+        is_valid = False
 
-  for availableSpectrumInquiryRequest in request:
+      if self.item_is_readable(availableSpectrumInquiryRequest, 'deviceDescriptor'):
+        if not self.validate_device_descriptor(availableSpectrumInquiryRequest['deviceDescriptor']):
+          is_valid = False
+      else:
+        is_valid = False
 
-    number_of_requests += 1
-    if item_is_readable(availableSpectrumInquiryRequest, 'requestId', log_file):
-      if not requestId_is_valid(availableSpectrumInquiryRequest['requestId'],
-                                log_file):
+      if self.item_is_readable(availableSpectrumInquiryRequest, 'location'):
+        if not self.validate_location(availableSpectrumInquiryRequest['location']):
+          is_valid = False
+      else:
+        is_valid = False
+
+      valid_inquiry_present = False
+      if self.item_is_readable(availableSpectrumInquiryRequest,
+                          'inquiredFrequencyRange', item_is_required = False):
+        if len(availableSpectrumInquiryRequest['inquiredFrequencyRange']) > 0:
+          valid_inquiry_present = True
+        if not self.validate_inquired_frequency_range(availableSpectrumInquiryRequest['inquiredFrequencyRange']):
+          is_valid = False
+
+      if self.item_is_readable(availableSpectrumInquiryRequest,
+                          'inquiredChannels', item_is_required=False):
+        if len(availableSpectrumInquiryRequest['inquiredChannels']) > 0:
+          valid_inquiry_present = True
+        if not self.validate_inquired_channels(availableSpectrumInquiryRequest['inquiredChannels']):
+          is_valid = False
+
+      if not valid_inquiry_present:
+        log_message = 'Neither frequency- nor channel-based inquiry is present'
+        self._warning(log_message)
+        is_valid = False
+
+      if self.item_is_readable(availableSpectrumInquiryRequest, 'minDesiredPower',
+                          item_is_required = False):
+        if type(availableSpectrumInquiryRequest['minDesiredPower']) not in [int, float]:
+          is_valid = False
+
+    return is_valid
+
+  def validate_certification_id(self, certificationId):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    allowed_nras = ['FCC']
+
+    is_valid = True
+
+    if not self.item_is_readable(certificationId, 'nra'):
+      is_valid = False
+    else:
+      if not self.type_is_correct(certificationId['nra'], 'nra', 'str'):
         is_valid = False
       else:
-        if availableSpectrumInquiryRequest['requestId'] not in requestIds:
-          requestIds.append(availableSpectrumInquiryRequest['requestId'])
+        if certificationId['nra'] not in allowed_nras:
+          is_valid = False
+    if not self.item_is_readable(certificationId, 'id'):
+      is_valid = False
+    else:
+      if not self.type_is_correct(certificationId['id'], 'id', 'str'):
+        is_valid = False
+
+    return is_valid
+
+  def validate_certification_ids(self, certificationIds):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    if not self.type_is_correct(certificationIds, 'certificationId', 'list'):
+      is_valid = False
+    else:
+      for certificationId in certificationIds:
+        if not self.validate_certification_id(certificationId):
+          is_valid = False
+
+    return is_valid
+
+  def validate_channels(self, channels):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    if self.item_is_readable(channels, 'globalOperatingClass'):
+      if type(channels['globalOperatingClass']) not in [int, float]:
+        is_valid = False
+    else:
+      is_valid = False
+
+    if self.item_is_readable(channels, 'channelCfi', item_is_required = False):
+      if self.type_is_correct(channels['channelCfi'], 'channelCfi', 'list'):
+        for channelCfi in channels['channelCfi']:
+          if type(channelCfi) not in [int, float]:
+            is_valid = False
+      else:
+        is_valid = False
+
+    return is_valid
+
+  def validate_device_descriptor(self, deviceDescriptor):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    if self.item_is_readable(deviceDescriptor, 'serialNumber'):
+      if not self.validate_serial_number(deviceDescriptor['serialNumber']):
+        is_valid = False
+    else:
+      is_valid = False
+
+    if self.item_is_readable(deviceDescriptor, 'certificationId'):
+      if not self.validate_certification_ids(deviceDescriptor['certificationId']):
+        is_valid = False
+    else:
+      is_valid = False
+
+    if self.item_is_readable(deviceDescriptor, 'rulesetIds'):
+      if not self.validate_ruleset_ids(deviceDescriptor['rulesetIds']):
+        is_valid = False
+    else:
+      is_valid = False
+
+    return is_valid
+
+  def validate_elevation(self, elevation):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    allowed_heightTypes = ['AGL', 'AMSL']
+
+    if self.item_is_readable(elevation, 'height'):
+      if not self.type_is_correct(elevation['height'], 'height', 'number'):
+        is_valid = False
+    else:
+      is_valid = False
+
+    if self.item_is_readable(elevation, 'heightType'):
+      if self.type_is_correct(elevation['heightType'], 'heightType', 'str'):
+        if elevation['heightType'] not in allowed_heightTypes:
+          log_message = 'Invalid heightType: ' + str(elevation['heightType'])
+          self._warning(log_message)
+          is_valid = False
+      else:
+        is_valid = False
+    else:
+      is_valid = False
+
+    if self.item_is_readable(elevation, 'verticalUncertainty'):
+      if not self.type_is_correct(elevation['verticalUncertainty'], 'verticalUncertainty', 'int'):
+        is_valid = False
+    else:
+      is_valid = False
+
+    return is_valid
+
+  def validate_ellipse(self, ellipse):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    if not self.item_is_readable(ellipse, 'center') or not self.validate_point(ellipse['center']):
+      is_valid = False
+
+    if self.item_is_readable(ellipse, 'majorAxis'):
+      if not self.type_is_correct(ellipse['majorAxis'], 'majorAxis', 'int'):
+        is_valid = False
+      elif ellipse['majorAxis'] < 0:
+        log_message = 'majorAxis must be a positive integer: ' + \
+                      str(ellipse['majorAxis'])
+        self._warning(log_message)
+        is_valid = False
+    else:
+      is_valid = False
+
+    if self.item_is_readable(ellipse, 'minorAxis'):
+      if not self.type_is_correct(ellipse['minorAxis'], 'minorAxis', 'int'):
+        is_valid = False
+      elif ellipse['minorAxis'] < 0:
+        log_message = 'minorAxis must be a positive integer: ' + \
+                      str(ellipse['minorAxis'])
+        self._warning(log_message)
+        is_valid = False
+    else:
+      is_valid = False
+
+    if self.item_is_readable(ellipse, 'orientation'):
+      if not self.type_is_correct(ellipse['orientation'], 'orientation', 'number'):
+        is_valid = False
+      elif ellipse['orientation'] < 0 or ellipse['orientation'] > 180:
+        log_message = 'orientation value is outside of 0-180: ' + \
+                      str(ellipse['orientation'])
+        self._warning(log_message)
+    else:
+      is_valid = False
+
+    return is_valid
+
+  def validate_inquired_channels(self, inquiredChannels):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    if self.type_is_correct(inquiredChannels, 'inquiredChannels', 'list'):
+      for channels in inquiredChannels:
+        if not self.validate_channels(channels):
+          is_valid = False
+      if len(inquiredChannels) == 0:
+        log_message = 'inquiredChannels is present but array is empty'
+        self._warning(log_message)
+        is_valid = False
+    else:
+      is_valid = False
+
+    return is_valid
+
+  def validate_inquired_frequency_range(self, inquiredFrequencyRange):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    if self.type_is_correct(inquiredFrequencyRange, 'inquiredFrequencyRange', 'list'):
+      for frequencyRange in inquiredFrequencyRange:
+        # Temporary patch to use sdi_validator_common implementation of validate_frequency_range
+        if all(self.item_is_readable(frequencyRange, val)
+               for val in ['lowFrequency', 'highFrequency']):
+          if not self.validate_frequency_range(FrequencyRange(**frequencyRange)):
+            is_valid = False
         else:
-          log_message = '\nrequestId is not unique: ' + \
-                      availableSpectrumInquiryRequest['requestId'] + '\n'
-          log(log_message, log_file)
+          is_valid = False
+      if len(inquiredFrequencyRange) == 0:
+        log_message = 'inquiredFrequencyRange is present but array is empty'
+        self._warning(log_message)
+        is_valid = False
+    else:
+      is_valid = False
+
+    return is_valid
+
+
+  def item_is_readable(self, request, item, item_is_required=True):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    try:
+      temp = request[item]
+    except:
+      if item_is_required:
+        log_message = item + ' is missing or otherwise unreadable'
+        self._warning(log_message)
+      return False
+
+    return is_valid
+
+
+  def validate_linear_polygon(self, linearPolygon):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    # TODO: Write this
+    is_valid = True
+    self._warning('Validation of request linearPolygon not yet implemented, presumed valid')
+
+    return is_valid
+
+
+  def validate_location(self, location):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    # Exactly one of ellipse, linearPolygon, or radialPolygon must be present
+    # and valid
+    num_location_types = 0
+
+    if self.item_is_readable(location, 'ellipse', item_is_required=False):
+      num_location_types += 1
+      if not self.validate_ellipse(location['ellipse']):
+        is_valid = False
+
+    if self.item_is_readable(location, 'linearPolygon', item_is_required=False):
+      num_location_types += 1
+      if not self.validate_linear_polygon(location['linearPolygon']):
+        is_valid = False
+
+    if self.item_is_readable(location, 'radialPolygon', item_is_required=False):
+      num_location_types += 1
+      if not self.validate_radial_polygon(location['radialPolygon']):
+        is_valid = False
+
+    if num_location_types != 1:
+      log_message = 'The number of location descriptions must be equal to 1. '
+      log_message += 'Number found: ' + str(num_location_types)
+      self._warning(log_message)
+      is_valid = False
+
+    if self.item_is_readable(location, 'elevation'):
+      if not self.validate_elevation(location['elevation']):
+        is_valid = False
+        self._warning(f'Elevation field is not valid: {location["elevation"]}')
+    else:
+      is_valid = False
+
+    allowed_indoorDeployments = [0, 1, 2]
+    if self.item_is_readable(location, 'indoorDeployment', item_is_required=False):
+      if self.type_is_correct(location['indoorDeployment'], 'indoorDeployment', 'int'):
+        if location['indoorDeployment'] not in allowed_indoorDeployments:
+          is_valid = False
+      else:
+        is_valid = False
+
+    return is_valid
+
+  def validate_point(self, point):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    if self.item_is_readable(point, 'longitude'):
+      if not self.type_is_correct(point['longitude'], 'longitude', 'number'):
+        is_valid = False
+      elif point['longitude'] < -180 or point['longitude'] > 180:
+        log_message = 'longitude is outside of -180..180: ' + \
+                      str(point['longitude'])
+        self._warning(log_message)
+        is_valid = False
+    else:
+      is_valid = False
+
+    if self.item_is_readable(point, 'latitude'):
+      if not self.type_is_correct(point['latitude'], 'latitude', 'number'):
+        is_valid = False
+      elif point['latitude'] < -90 or point['latitude'] > 90:
+        log_message = 'latitude is outside of -90..90: ' + \
+                      str(point['latitude'])
+        self._warning(log_message)
+        is_valid = False
+    else:
+      is_valid = False
+
+    return is_valid
+
+
+  def validate_radial_polygon(self, radialPolygon):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    # TODO: Write this
+    is_valid = True
+    self._warning('Validation of request radialPolygon not yet implemented, presumed valid')
+
+    return is_valid
+
+
+  def validate_request_id(self, requestId):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    if not self.type_is_correct(requestId, 'requestId', 'str'):
+      return False
+    else:
+      return True
+
+
+  def validate_ruleset_ids(self, rulesetIds):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    is_valid = True
+
+    valid_rulesetIds = ['US_47_CFR_PART_15_SUBPART_E']
+
+    if self.type_is_correct(rulesetIds, 'rulesetIds', 'list'):
+      for rulesetId in rulesetIds:
+        if rulesetId not in valid_rulesetIds:
+          log_message = 'Invalid rulesetId: ' + str(rulesetId)
+          self._warning(log_message)
           is_valid = False
     else:
       is_valid = False
 
-    if item_is_readable(availableSpectrumInquiryRequest, 'deviceDescriptor',
-                        log_file):
-      if not deviceDescriptor_is_valid(availableSpectrumInquiryRequest['deviceDescriptor'],
-                                       log_file):
-        is_valid = False
-    else:
-      is_valid = False
+    return is_valid
 
-    if item_is_readable(availableSpectrumInquiryRequest, 'location', log_file):
-      if not location_is_valid(availableSpectrumInquiryRequest['location'],
-                               log_file):
-        is_valid = False
 
-    valid_inquiry_present = False
-    if item_is_readable(availableSpectrumInquiryRequest,
-                        'inquiredFrequencyRange', print_to_stdout = False):
-      if len(availableSpectrumInquiryRequest['inquiredFrequencyRange']) > 0:
-        valid_inquiry_present = True
-      if not inquiredFrequencyRange_is_valid(availableSpectrumInquiryRequest['inquiredFrequencyRange'],
-                                             log_file):
-        is_valid = False
+  def validate_serial_number(self, serialNumber):
 
-    if item_is_readable(availableSpectrumInquiryRequest,
-                        'inquiredChannels', print_to_stdout=False):
-      if len(availableSpectrumInquiryRequest['inquiredChannels']) > 0:
-        valid_inquiry_present = True
-      if not inquiredChannels_is_valid(availableSpectrumInquiryRequest['inquiredChannels'],
-                                       log_file):
-        is_valid = False
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
 
-    if not valid_inquiry_present:
-      log_message = '\nNeither frequency- nor channel-based inquiry is present\n'
-      log(log_message, log_file)
-      is_valid = False
-
-    if item_is_readable(availableSpectrumInquiryRequest, 'minDesiredPower',
-                        print_to_stdout = False):
-      if type(availableSpectrumInquiryRequest['minDesiredPower']) not in [int, float]:
-        is_valid = False
-
-  return is_valid
-
-
-def certificationId_is_valid(certificationId, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  allowed_nras = ['FCC']
-
-  is_valid = True
-
-  if not item_is_readable(certificationId, 'nra', log_file):
-    is_valid = False
-  else:
-    if not type_is_correct(certificationId['nra'], 'nra', 'str', log_file):
-      is_valid = False
-    else:
-      if certificationId['nra'] not in allowed_nras:
-        is_valid = False
-  if not item_is_readable(certificationId, 'id', log_file):
-    is_valid = False
-  else:
-    if not type_is_correct(certificationId['id'], 'id', 'str', log_file):
-      is_valid = False
-
-  return is_valid
-
-
-def certificationIds_is_valid(certificationIds, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  if not type_is_correct(certificationIds, 'certificationId', 'list', log_file):
-    is_valid = False
-  else:
-    for certificationId in certificationIds:
-      if not certificationId_is_valid(certificationId, log_file):
-        is_valid = False
-
-  return is_valid
-
-
-def channels_is_valid(channels, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  if item_is_readable(channels, 'globalOperatingClass', log_file):
-    if type(channels['globalOperatingClass']) not in [int, float]:
-      is_valid = False
-  else:
-    is_valid = False
-
-  if item_is_readable(channels, 'channelCfi', print_to_stdout = False):
-    if type_is_correct(channels['channelCfi'], 'channelCfi', 'list', log_file):
-      for channelCfi in channels['channelCfi']:
-        if type(channelCfi) not in [int, float]:
-          is_valid = False
-    else:
-      is_valid = False
-
-  return is_valid
-
-
-def deviceDescriptor_is_valid(deviceDescriptor, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  if item_is_readable (deviceDescriptor, 'serialNumber', log_file):
-    if not serialNumber_is_valid(deviceDescriptor['serialNumber'], log_file):
-      is_valid = False
-  else:
-    is_valid = False
-
-  if item_is_readable(deviceDescriptor, 'certificationId', log_file):
-    if not certificationIds_is_valid(deviceDescriptor['certificationId'],
-                                    log_file):
-      is_valid = False
-  else:
-    is_valid = False
-
-  if item_is_readable(deviceDescriptor, 'rulesetIds', log_file):
-    if not rulesetIds_is_valid(deviceDescriptor['rulesetIds'], log_file):
-      is_valid = False
-  else:
-    is_valid = False
-
-  return is_valid
-
-
-def elevation_is_valid(elevation, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  allowed_heightTypes = ['AGL', 'AMSL']
-
-  if item_is_readable(elevation, 'height', log_file):
-    if not type_is_correct(elevation['height'], 'height', 'number', log_file):
-      is_valid = False
-  else:
-    is_valid = False
-
-  if item_is_readable(elevation, 'heightType', log_file):
-    if type_is_correct(elevation['heightType'], 'heightType', 'str', log_file):
-      if elevation['heightType'] not in allowed_heightTypes:
-        log_message = '\nInvalid heightType: ' + str(elevation['heightType'])\
-                      + '\n'
-        log(log_message, log_file)
-        is_valid = False
-    else:
-      is_valid = False
-  else:
-    is_valid = False
-
-  if item_is_readable(elevation, 'verticalUncertainty', log_file):
-    if not type_is_correct(elevation['verticalUncertainty'],
-                           'verticalUncertainty', 'int', log_file):
-      is_valid = False
-  else:
-    is_valid = False
-
-  return is_valid
-
-
-def ellipse_is_valid(ellipse, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  if item_is_readable(ellipse, 'center', log_file):
-    if not point_is_valid(ellipse['center'], log_file):
-      is_valid = False
-
-  if item_is_readable(ellipse, 'majorAxis', log_file):
-    if not type_is_correct(ellipse['majorAxis'], 'majorAxis', 'int', log_file):
-      is_valid = False
-    elif ellipse['majorAxis'] < 0:
-      log_message = '\nmajorAxis must be a positive integer: ' + \
-                    str(ellipse['majorAxis']) + '\n'
-      log(log_message, log_file)
-      is_valid = False
-
-  if item_is_readable(ellipse, 'minorAxis', log_file):
-    if not type_is_correct(ellipse['minorAxis'], 'minorAxis', 'int', log_file):
-      is_valid = False
-    elif ellipse['minorAxis'] < 0:
-      log_message = '\nminorAxis must be a positive integer: ' + \
-                    str(ellipse['minorAxis']) + '\n'
-      log(log_message, log_file)
-      is_valid = False
-
-  if item_is_readable(ellipse, 'orientation', log_file):
-    if not type_is_correct(ellipse['orientation'], 'orientation', 'number',
-                           log_file):
-      is_valid = False
-    elif ellipse['orientation'] < 0 or ellipse['orientation'] > 180:
-      log_message = '\norientation value is outside of 0-180: ' + \
-                    str(ellipse['orientation']) + '\n'
-      log(log_message, log_file)
-
-  return is_valid
-
-
-def frequencyRange_is_valid(frequencyRange, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  if item_is_readable(frequencyRange, 'lowFrequency', log_file):
-    if not type_is_correct(frequencyRange['lowFrequency'], 'lowFrequency', 'int', log_file):
-      is_valid = False
-  else:
-    is_valid = False
-
-  if item_is_readable(frequencyRange, 'highFrequency', log_file):
-    if not type_is_correct(frequencyRange['highFrequency'], 'highFrequency', 'int', log_file):
-      is_valid = False
-  else:
-    is_valid = False
-
-  return is_valid
-
-
-def inquiredChannels_is_valid(inquiredChannels, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  if type_is_correct(inquiredChannels, 'inquiredChannels', 'list', log_file):
-    for channels in inquiredChannels:
-      if not channels_is_valid(channels, log_file):
-        is_valid = False
-    if len(inquiredChannels) == 0:
-      log_message = '\ninquiredChannels is present but array is empty\n'
-      log(log_message, log_file)
-      is_valid = False
-  else:
-    is_valid = False
-
-  return is_valid
-
-
-def inquiredFrequencyRange_is_valid(inquiredFrequencyRange, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  if type_is_correct(inquiredFrequencyRange, 'inquiredFrequencyRange', 'list', log_file):
-    for frequencyRange in inquiredFrequencyRange:
-      if not frequencyRange_is_valid(frequencyRange, log_file):
-        is_valid = False
-    if len(inquiredFrequencyRange) == 0:
-      log_message = '\ninquiredFrequencyRange is present but array is empty\n'
-      log(log_message, log_file)
-      is_valid = False
-  else:
-    is_valid = False
-
-  return is_valid
-
-
-def item_is_readable(request, item, log_file='', print_to_stdout=True):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  try:
-    temp = request[item]
-  except:
-    log_message = item + ' is missing or otherwise unreadable\n'
-    log(log_message, log_file, print_to_stdout)
-    return False
-
-  return is_valid
-
-
-def linearPolygon_is_valid(linearPolygon, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  # TODO: Write this
-  is_valid = True
-
-  return is_valid
-
-
-def location_is_valid(location, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  # Exactly one of ellipse, linearPolygon, or radialPolygon must be present
-  # and valid
-  num_location_types = 0
-
-  if item_is_readable(location, 'ellipse', print_to_stdout=False):
-    num_location_types += 1
-    if not ellipse_is_valid(location['ellipse'], log_file):
-      is_valid = False
-
-  if item_is_readable(location, 'linearPolygon', print_to_stdout=False):
-    num_location_types += 1
-    if not linearPolygon_is_valid(location['linearPolyon'], log_file):
-      is_valid = False
-
-  if item_is_readable(location, 'radialPoolygon', print_to_stdout=False):
-    num_location_types += 1
-    if not radialPolygon_is_valid(location['ellipse'], log_file):
-      is_valid = False
-
-  if num_location_types != 1:
-    log_message = '\nThe number of location descriptions must be equal to 1. '
-    log_message += 'Number found: ' + str(num_location_types) + '\n'
-    log(log_message, log_file)
-    is_valid = False
-
-  if item_is_readable(location, 'elevation', log_file):
-    if not elevation_is_valid(location['elevation'], log_file):
-#      print('Elevation not valid') # DEBUG
-      is_valid = False
-  else:
-    is_valid = False
-
-  allowed_indoorDeployments = [0, 1, 2]
-  if item_is_readable(location, 'indoorDeployment', log_file):
-    if type_is_correct(location['indoorDeployment'], 'indoorDeployment',
-                       'int', log_file):
-      if location['indoorDeployment'] not in allowed_indoorDeployments:
-        is_valid = False
-    else:
-      is_valid = False
-  else:
-    is_valid = False
-
-  return is_valid
-
-
-def log(message, log_file='', print_to_stdout=True):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  if log_file != '':
-    f = open(log_file, 'a')
-    f.write(message)
-    f.close()
-  if print_to_stdout:
-    print(message)
-  return
-
-
-def point_is_valid(point, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  if item_is_readable(point, 'longitude', log_file):
-    if not type_is_correct(point['longitude'], 'longitude', 'number', log_file):
-      is_valid = False
-    elif point['longitude'] < -180 or point['longitude'] > 180:
-      log_message = '\nlongitude is outside of -180..180: ' + \
-                    str(point['longitude']) + '\n'
-      log(log_message, log_file)
-      is_valid = False
-  else:
-    is_valid = False
-
-  if item_is_readable(point, 'latitude', log_file):
-    if not type_is_correct(point['latitude'], 'latitude', 'number', log_file):
-      is_valid = False
-    elif point['latitude'] < -90 or point['latitude'] > 90:
-      log_message = '\nlatitude is outside of -90..90: ' + \
-                    str(point['latitude']) + '\n'
-      log(log_message, log_file)
-      is_valid = False
-  else:
-    is_valid = False
-
-  return is_valid
-
-
-def radialPolygon_is_valid(radialPolygon, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  # TODO: Write this
-  is_valid = True
-
-  return is_valid
-
-
-def requestId_is_valid(requestId, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  if not type_is_correct(requestId, 'requestId', 'str', log_file):
-    return False
-  else:
-    return True
-
-
-def rulesetIds_is_valid(rulesetIds, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  is_valid = True
-
-  valid_rulesetIds = ['US_47_CFR_PART_15_SUBPART_E']
-
-  if type_is_correct(rulesetIds, 'rulesetIds', 'list', log_file):
-    for rulesetId in rulesetIds:
-      if rulesetId not in valid_rulesetIds:
-        log_message = '\nInvalid rulesetId: ' + str(rulesetId) + '\n'
-        log(log_message, log_file)
-        is_valid = False
-  else:
-    is_valid = False
-
-  return is_valid
-
-
-def serialNumber_is_valid(serialNumber, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  if not type_is_correct(serialNumber, 'serialNumber', 'str', log_file):
-    return False
-  else:
-    return True
-
-
-def type_is_correct(variable, variable_name, expected_type, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  if expected_type == 'str':
-    if type(variable) != str:
-      log_message = '\n' + variable_name + ' is not of type string: ' \
-                    + str(variable) + '\n'
-      log(log_message, log_file)
+    if not self.type_is_correct(serialNumber, 'serialNumber', 'str'):
       return False
     else:
       return True
-  elif expected_type == 'int':
-    if type(variable) != int:
-      log_message = '\n' + variable_name + ' is not of type int: ' \
-                    + str(variable) + '\n'
-      log(log_message, log_file)
-      return False
+
+
+  def type_is_correct(self, variable, variable_name, expected_type):
+
+    if DEBUG:
+      print(inspect.currentframe().f_code.co_name)
+
+    if expected_type == 'str':
+      if type(variable) != str:
+        log_message = variable_name + ' is not of type string: ' \
+                      + str(variable)
+        self._warning(log_message)
+        return False
+      else:
+        return True
+    elif expected_type == 'int':
+      if type(variable) != int:
+        log_message = variable_name + ' is not of type int: ' \
+                      + str(variable)
+        self._warning(log_message)
+        return False
+      else:
+        return True
+    elif expected_type == 'float':
+      if type(variable) != float:
+        log_message = variable_name + ' is not of type float: ' \
+                      + str(variable)
+        self._warning(log_message)
+        return False
+      else:
+        return True
+    elif expected_type == 'number':
+      if type(variable) not in [int, float]:
+        log_message = variable_name + ' is not of type number (float or int): ' \
+                      + str(variable)
+        self._warning(log_message)
+        return False
+      else:
+        return True
+    elif expected_type == 'list':
+      if type(variable) != list:
+        log_message = variable_name + ' is not of type list: ' \
+                      + str(variable)
+        self._warning(log_message)
+        return False
+      else:
+        return True
     else:
-      return True
-  elif expected_type == 'float':
-    if type(variable) != float:
-      log_message = '\n' + variable_name + ' is not of type float: ' \
-                    + str(variable) + '\n'
-      log(log_message, log_file)
-      return False
-    else:
-      return True
-  elif expected_type == 'number':
-    if type(variable) not in [int, float]:
-      log_message = '\n' + variable_name + ' is not of type number (float or int): ' \
-                    + str(variable) + '\n'
-      log(log_message, log_file)
-      return False
-    else:
-      return True
-  elif expected_type == 'list':
-    if type(variable) != list:
-      log_message = '\n' + variable_name + ' is not of type list: ' \
-                    + str(variable) + '\n'
-      log(log_message, log_file)
-      return False
-    else:
-      return True
-  else:
-    print(expected_type)
-    print('Problem in type_is_correct')
-    return False
-
-
-def version_is_valid(version, log_file):
-
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
-
-  allowed_versions = ['1.1']
-
-  is_valid = True
-
-  if type_is_correct(version, 'version', 'str', log_file):
-    if version not in allowed_versions:
-      log_message = '\nVersion not supported.\n'
-      log_message += '  Version read from file: ' + version + '\n'
-      log_message += '  Supported version(s): ' + str(allowed_versions) + '\n'
-      log(log_message, log_file)
-      is_valid = False
-  else:
-    is_valid = False
-
-  return is_valid
-
+      self._fatal(f'Requested type {expected_type} not supported by '
+                   'request_validator.type_is_correct')
+      raise ValueError(f'Requested type {expected_type} not supported by '
+                        'request_validator.type_is_correct')
 
 def main():
 
-  if DEBUG:
-    print(inspect.currentframe().f_code.co_name)
+  # Setup logger
+  logging.basicConfig()
+  logger = logging.getLogger()
+  logger.setLevel(logging.INFO)
 
-  global requestIds
-  requestIds = []
+  validator = InquiryRequestValidator(logger=logger)
 
-  in_file = 'AFCS.FSP.3.json'
+  in_file = 'request_sample.json'
   log_file = in_file + '_log.txt'
+
+  logger.addHandler(logging.FileHandler(log_file, mode='w', encoding='utf-8'))
 
   is_valid = True
 
   if not os.path.exists(in_file):
-    log_message = '\nFile does not exist: ' + in_file + '\n'
-    log(log_message, log_file)
+    log_message = 'File does not exist: ' + in_file
+    logger.fatal(log_message)
     is_valid = False
 
-  with open(in_file) as f:
+  with open(in_file, encoding='utf-8') as f:
     try:
       request = json.load(f)
     except:
-      log_message = '\nFile not parsable as JSON: ' + in_file + '\n'
-      log(log_message, log_file)
+      log_message = 'File not parsable as JSON: ' + in_file
+      logger.error(log_message)
       is_valid = False
 
   if is_valid:
-    if availableSpectrumInquiryRequestMessage_is_valid(request, log_file):
+    if validator.validate_available_spectrum_inquiry_response_message(request):
       log_message = 'No errors found in ' + in_file
-      log(log_message, log_file)
+      logger.info(log_message)
     else:
-      print('\n*** Errors found ***\nPlease see log file: ' + log_file)
+      logger.error('*** Errors found ***\nPlease see log file: ' + log_file)
   else:
-    print('\n*** Errors found ***\nPlease see log file: ' + log_file)
+    logger.error('*** Errors found ***\nPlease see log file: ' + log_file)
 
 if __name__ == "__main__":
+  import logging
+  import os
+  import json
   main()
