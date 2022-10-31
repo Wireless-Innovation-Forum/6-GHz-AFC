@@ -227,7 +227,7 @@ def main():
         else:
           logger.fatal('Request does not pass validation, but response mask doesn\'t expect an '
                        'error. Test SKIPPED.\n')
-          results.append(TestResult.SKIPPED)
+          results.add_result(test_name, TestResult.SKIPPED)
           continue
       else:
         logger.info('Request passes validation.')
