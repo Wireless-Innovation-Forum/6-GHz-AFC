@@ -1,0 +1,127 @@
+{
+    "version": "1.1",
+    "expectedSpectrumInquiryResponses": [
+        {
+            "requestId": "11235813",
+            "rulesetId": "US_47_CFR_PART_15_SUBPART_E",
+            "expectedFrequencyInfo": [
+                {
+                    "frequencyRange": {
+                        "lowFrequency": 5925,
+                        "highFrequency": 6020
+                    },
+                    "maxPsd": {
+                        "upperBound": 23
+                    }
+                },
+                {
+                    "frequencyRange": {
+                        "lowFrequency": 6020,
+                        "highFrequency": 6050
+                    },
+                    "maxPsd": {
+                        "nominalValue": 1.0,
+                        "upperBound": 1.5,
+                        "lowerBound": -2
+                    }
+                },
+                {
+                    "frequencyRange": {
+                        "lowFrequency": 6050,
+                        "highFrequency": 6360
+                    },
+                    "maxPsd": {
+                        "upperBound": 23.0
+                    }
+                },
+                {
+                    "frequencyRange": {
+                        "lowFrequency": 6360,
+                        "highFrequency": 6390
+                    },
+                    "maxPsd": {
+                        "nominalValue": -24,
+                        "upperBound": -23
+                    }
+                },
+                {
+                    "frequencyRange": {
+                        "lowFrequency": 6390,
+                        "highFrequency": 6425
+                    },
+                    "maxPsd": {
+                        "upperBound": 23,
+                        "lowerBound": 20
+                    }
+                }
+            ],
+            "expectedChannelInfo": [
+                {
+                    "globalOperatingClass": 133,
+                    "channelCfi": [
+                        7,
+                        39,
+                        55,
+                        71,
+                        135,
+                        151,
+                        167
+                    ],
+                    "maxEirp": [
+                        {
+                            "nominalValue": 27.8,
+                            "upperBound": 30,
+                            "lowerBound": 22
+                        },
+                        {
+                            "nominalValue": 36,
+                            "upperBound": 36.5,
+                            "lowerBound": 35.5
+                        },
+                        {
+                            "nominalValue": 36,
+                            "upperBound": 36.5,
+                            "lowerBound": 35.5
+                        },
+                        {
+                            "nominalValue": 36,
+                            "upperBound": 36.5,
+                            "lowerBound": 35.5
+                        },
+                        {
+                            "nominalValue": 36,
+                            "upperBound": 36.5,
+                            "lowerBound": 35.5
+                        },
+                        {
+                            "nominalValue": 33,
+                            "upperBound": 34,
+                            "lowerBound": 32
+                        },
+                        {
+                            "nominalValue": 36,
+                            "upperBound": 36.5,
+                            "lowerBound": 35.5
+                        }
+                    ]
+                },
+                {
+                    "globalOperatingClass": 134,
+                    "channelCfi": [
+                        47
+                    ],
+                    "maxEirp": [
+                        {
+                            "nominalValue": 35,
+                            "upperBound": 36.5,
+                            "lowerBound": 33
+                        }
+                    ]
+                }
+            ],
+            "expectedResponseCodes": [
+                0
+            ]
+        }
+    ]
+}
