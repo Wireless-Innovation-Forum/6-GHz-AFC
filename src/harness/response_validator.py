@@ -77,6 +77,7 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
     is_valid = True
 
     if resp.supplementalInfo is not None:
+      # supplementalInfo is valid
       is_valid &= self.validate_supplemental_info(resp.supplementalInfo)
       try:
         match afc_resp.ResponseCode.get_raw_value(resp.responseCode):
@@ -92,6 +93,7 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
           case _:
             disallowed_params = vars(resp.supplementalInfo).keys()
 
+        # supplementalInfo only contains fields permitted by the response code
         for param in disallowed_params:
           if getattr(resp.supplementalInfo, param, None) is not None:
             is_valid = False
@@ -116,7 +118,10 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
     Returns:
       True if all checks are satisfied
       False otherwise"""
+    # frequencyRange is valid
     is_valid = self.validate_frequency_range(info.frequencyRange)
+
+    # maxPsd is a valid, finite number
     try:
       if not math.isfinite(info.maxPsd):
         raise TypeError()
@@ -142,10 +147,13 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
       False otherwise"""
     is_valid = True
     try:
+      # channelCfi and maxEirp must have equal lengths
       if len(info.channelCfi) != len(info.maxEirp):
         is_valid = False
         self._warning(f'Length of channelCfi list ({info.channelCfi}) does '
                       f'not match length of maxEirp list ({info.maxEirp})')
+
+      # channelCfi and maxEirp cannot be empty
       for field in ['channelCfi', 'maxEirp']:
         if len(getattr(info, field)) < 1:
           is_valid = False
@@ -153,6 +161,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
     except TypeError as ex:
       is_valid = False
       self._warning(f'Could not validate lengths of channel and eirp lists: {ex}')
+
+    # All values for channelCfi, maxEirp and globalOperatingClass must be valid, finite numbers
     try:
       if not all(math.isfinite(eirp) for eirp in info.maxEirp):
         raise TypeError()
@@ -194,27 +204,36 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
     Returns:
       True if all checks are satisfied
       False otherwise"""
+    # response (code, description, supplemental info) is valid
     is_valid = self.validate_response(resp.response)
+
     try:
       if (afc_resp.ResponseCode.get_raw_value(resp.response.responseCode) !=
           afc_resp.ResponseCode.SUCCESS.value):
         disallowed_fields = ["availableFrequencyInfo",
                              "availableChannelInfo",
                              "availabilityExpireTime"]
+        # Availability info is only included if response code is Success
         for field in disallowed_fields:
           if getattr(resp, field) is not None:
             is_valid = False
             self._warning(f'ResponseCode is not SUCCESS but {field} is provided')
+
       else:
+        # Expiration time is included if response code is Success
         if resp.availabilityExpireTime is None:
           is_valid = False
           self._warning('ResponseCode is SUCCESS but availabilityExpireTime is not provided')
+
+        # At least one availability type is included if response code is Success
         if (resp.availableChannelInfo is None) and (resp.availableFrequencyInfo is None):
           is_valid = False
           self._warning('ResponseCode is SUCCESS but no availability information is provided')
     except AttributeError as ex:
       is_valid = False
       self._warning(f'Could not get response code value: {ex}')
+
+    # All availability info is valid
     if resp.availableFrequencyInfo is not None:
       try:
         is_valid &= all(self.validate_available_frequency_info(x)
@@ -229,6 +248,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
       except TypeError as ex:
         self._warning(f'Exception caught validating channel info: {ex}')
         is_valid = False
+
+    # availabilityExpireTime is valid datetime
     if resp.availabilityExpireTime is not None:
       try:
         if resp.availabilityExpireTime[-1] != 'Z':
@@ -248,9 +269,9 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
 
     Checks:
       version string is valid
-      vendorExtensions are valid
       availableSpectrumInquiryResponses exist and are all valid
       Each AvailableSpectrumInquiryResponse has a unqiue requestId
+      vendorExtensions are valid
 
     Parameters:
       msg (AvailableSpectrumInquiryResponseMessage): Message to be validated
@@ -265,6 +286,7 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
         self._warning(f'Length of availableSpectrumInquiryResponses '
                       f'list must be at least 1: {msg.availableSpectrumInquiryResponses}')
       else:
+        # availableSpectrumInquiryResponses exist and are all valid
         is_valid &= all([self.validate_available_spectrum_inquiry_response(x)
                         for x in msg.availableSpectrumInquiryResponses])
 

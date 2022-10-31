@@ -13,7 +13,7 @@ Configure the AFC connection properties and desired tests according to the next 
 
 ## Harness configuraton
 * Configuration files:
-    *   **./afc.cfg**: AFC SUT connection options. See afc.py [GetTestingAfc()] for more details
+    *   **./afc.cfg**: AFC SUT connection options. See afc.py [GetTestingAfc()] for more details. A script for sending a sample request file to an AFC is included in *./send_spectrum_inquiry.py*.
     *   **./tests_to_run.py**: Specify tests to run from the *./inquirires* directory. If 'all' is listed first, harness executes on all *(test_name).json* files in *./inquiries.* Corresponding response masks should be placed in the *./masks* directory, named as *(test_name)_mask.json*.
 
 ## Sample files

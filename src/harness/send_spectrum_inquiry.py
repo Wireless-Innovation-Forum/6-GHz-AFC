@@ -11,13 +11,8 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""Top main script of the test harness.
-
-If writing your own top level script to run the test harness,
-look here how the setup is performed.
-It is particularly important to correctly set the geo drivers
-and multiprocessing pool for best performance
-"""
+"""If writing your own top level script to run the test harness,
+look here how the setup is performed."""
 import afc
 import json
 
