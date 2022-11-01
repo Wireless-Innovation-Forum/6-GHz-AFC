@@ -1,0 +1,103 @@
+{
+  "version": "1.3",
+  "availableSpectrumInquiryRequests": [
+    {
+      "requestId": "REQ-FSP32",
+      "deviceDescriptor": {
+        "serialNumber": "SN-FSP32",
+        "certificationId": [
+          {
+            "nra": "FCC",
+            "id": "FCCID-FSP32"
+          }
+        ],
+        "rulesetIds": [
+          "US_47_CFR_PART_15_SUBPART_E"
+        ]
+      },
+      "location": {
+        "elevation": {
+          "height": 3.0,
+          "heightType": "AGL",
+          "verticalUncertainty": 2
+        },
+        "radialPolygon": {
+          "center": {
+            "longitude": -102.234875,
+            "latitude": 30.573949
+          },
+          "outerBoundary": [
+            {
+              "length": 300.0,
+              "angle": 0.0
+            },
+            {
+              "length": 300.0,
+              "angle": 36.0
+            },
+            {
+              "length": 300.0,
+              "angle": 72.0
+            },
+            {
+              "length": 300.0,
+              "angle": 108.0
+            },
+            {
+              "length": 300.0,
+              "angle": 144.0
+            },
+            {
+              "length": 300.0,
+              "angle": 180.0
+            },
+            {
+              "length": 300.0,
+              "angle": 216.0
+            },
+            {
+              "length": 300.0,
+              "angle": 252.0
+            },
+            {
+              "length": 300.0,
+              "angle": 288.0
+            },
+            {
+              "length": 300.0,
+              "angle": 324.0
+            }
+          ]
+        },
+        "indoorDeployment": 2
+      },
+      "inquiredFrequencyRange": [
+        {
+          "lowFrequency": 5925,
+          "highFrequency": 6425
+        },
+        {
+          "lowFrequency": 6525,
+          "highFrequency": 6875
+        }
+      ],
+      "inquiredChannels": [
+        {
+          "globalOperatingClass": 131
+        },
+        {
+          "globalOperatingClass": 132
+        },
+        {
+          "globalOperatingClass": 133
+        },
+        {
+          "globalOperatingClass": 134
+        },
+        {
+          "globalOperatingClass": 136
+        }
+      ]
+    }
+  ]
+}

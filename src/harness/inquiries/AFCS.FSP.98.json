@@ -1,0 +1,64 @@
+{
+  "version": "1.3",
+  "availableSpectrumInquiryRequests": [
+    {
+      "requestId": "REQ-FSP98",
+      "deviceDescriptor": {
+        "serialNumber": "SN-FSP98",
+        "certificationId": [
+          {
+            "nra": "FCC",
+            "id": "FCCID-FSP98"
+          }
+        ],
+        "rulesetIds": [
+          "US_47_CFR_PART_15_SUBPART_E"
+        ]
+      },
+      "location": {
+        "elevation": {
+          "height": 18.0,
+          "heightType": "AGL",
+          "verticalUncertainty": 2
+        },
+        "ellipse": {
+          "center": {
+            "longitude": -121.088367,
+            "latitude": 47.747233
+          },
+          "majorAxis": 30,
+          "minorAxis": 30,
+          "orientation": 45.0
+        },
+        "indoorDeployment": 2
+      },
+      "inquiredFrequencyRange": [
+        {
+          "lowFrequency": 5925,
+          "highFrequency": 6425
+        },
+        {
+          "lowFrequency": 6525,
+          "highFrequency": 6875
+        }
+      ],
+      "inquiredChannels": [
+        {
+          "globalOperatingClass": 131
+        },
+        {
+          "globalOperatingClass": 132
+        },
+        {
+          "globalOperatingClass": 133
+        },
+        {
+          "globalOperatingClass": 134
+        },
+        {
+          "globalOperatingClass": 136
+        }
+      ]
+    }
+  ]
+}
