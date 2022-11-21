@@ -31,7 +31,7 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
   """Provides validation functions for AFC Response-specific types"""
 
   def __init__(self, *args, **kwargs):
-    super().__init__(args, kwargs)
+    super().__init__(*args, **kwargs)
 
     log_copy = self._log_file if self._log_file is not None else self._logger
     self._resp_validator = InquiryResponseValidator(logger=log_copy, echo_log=self.echo_log,
