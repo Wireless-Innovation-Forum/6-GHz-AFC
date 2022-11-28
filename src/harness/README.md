@@ -16,6 +16,9 @@ Configure the AFC connection properties and desired tests according to the next 
     *   **./afc.cfg**: AFC SUT connection options. See afc.py [GetTestingAfc()] for more details. A script for sending a sample request file to an AFC is included in *./send_spectrum_inquiry.py*.
     *   **./tests_to_run.py**: Specify tests to run from the *./inquirires* directory. If 'all' is listed first, harness executes on all *(test_name).json* files in *./inquiries.* Corresponding response masks should be placed in the *./masks* directory, named as *(test_name)_mask.json*.
 
+## Specification Version
+AFC communication and message validation is done according to the current version of the Wi-Fi Alliance AFC System to AFC Device Interface Specification (v1.3). This specification is available from the [Wi-Fi Alliance website](https://www.wi-fi.org/discover-wi-fi/specifications) under "AFC Specification and Test Plans."
+
 ## Sample files
 Example json files for the inquiry request, response, and response mask are provided as:
 *   **./request_sample.json**
