@@ -270,7 +270,7 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
     Checks:
       version string is valid
       availableSpectrumInquiryResponses exist and are all valid
-      Each AvailableSpectrumInquiryResponse has a unqiue requestId
+      Each AvailableSpectrumInquiryResponse has a unique requestId
       vendorExtensions are valid
 
     Parameters:

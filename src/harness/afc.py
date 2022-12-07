@@ -70,7 +70,7 @@ class AfcConnectionHandler(TestHarnessLogger):
     auth_info (ClientCertAuth or AuthBase): Client authentication info. May be None if the AFC does
                                             not enforce client authentication, or it may be one of
                                             the supported auth types (ClientCertAuth or a object
-                                            implmeneting the request library's AuthBase interface).
+                                            implementing the request library's AuthBase interface).
     timeout (float): The timeout to be used for all network operations, in seconds.'''
   base_url: str
   method_url: str = "availableSpectrumInquiry"
@@ -186,7 +186,7 @@ class AfcConnectionHandler(TestHarnessLogger):
     return self._resp.content
 
   def get_last_http_code(self):
-    """Gets the HTTP response code received in respoonse to the most recent request, if a valid
+    """Gets the HTTP response code received in response to the most recent request, if a valid
     response exists.
 
     Returns:

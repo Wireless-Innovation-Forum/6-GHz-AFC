@@ -31,7 +31,7 @@ class ResponseCode(enum.Enum):
   Code  0 represents success
   Codes 100-199 represent errors related to the protocol
   Codes 300-399 represent errors specific to message exchanges
-    for the inqury
+    for the inquiry
   """
 
   GENERAL_FAILURE = -1
@@ -163,9 +163,9 @@ class AvailableChannelInfo:
   Reports the maximum power available in a given channel
 
   Attributes:
-    globalOperatingClass: Used to define the channel center frequency indicies
+    globalOperatingClass: Used to define the channel center frequency indices
       and operating bandwidth
-    channelCfi: List of channel center frequency indicies that are available
+    channelCfi: List of channel center frequency indices that are available
     maxEirp: Maximum permissible EIRP for each channel in channelCfi, expressed in dBm
   """
   globalOperatingClass: Union[float, int]
@@ -189,7 +189,7 @@ class AvailableSpectrumInquiryResponse:
     response: Information about the outcome of the spectrum inquiry
     availableFrequencyInfo: Spectrum availability expressed in terms of frequency ranges
     availableChannelInfo: Spectrum availability expressed in terms of channels
-    availabilityExpireTime: The time when the specified spectrum availablity expires
+    availabilityExpireTime: The time when the specified spectrum availability expires
     vendorExtensions: Optional vendor extensions
   """
   requestId: str
@@ -234,7 +234,7 @@ class AvailableSpectrumInquiryResponse:
 class AvailableSpectrumInquiryResponseMessage:
   """Top-level Spectrum Inquiry Response Message
 
-  Contains responses to one or more spectrum inquries
+  Contains responses to one or more spectrum inquiries
 
   Attributes:
     version: version number of the inquiry request

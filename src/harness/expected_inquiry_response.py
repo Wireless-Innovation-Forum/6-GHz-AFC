@@ -99,9 +99,9 @@ class ExpectedAvailableChannelInfo:
   Reports the expected range in maximum allowed power for given channels
 
   Attributes:
-    globalOperatingClass: Used to define the channel center frequency indicies
+    globalOperatingClass: Used to define the channel center frequency indices
       and operating bandwidth
-    channelCfi: List of channel center frequency indicies that are available
+    channelCfi: List of channel center frequency indices that are available
     maxEirp: Maximum permissible EIRP for each channel in channelCfi, expressed in dBm. Stored as
       an expected range object to accommodate variance in AFC system calculation
   """
@@ -158,7 +158,7 @@ class ExpectedSpectrumInquiryResponse:
 class ExpectedSpectrumInquiryResponseMessage:
   """Top-level Expected Spectrum Inquiry Response Message
 
-  Contains expected responses to one or more spectrum inquries
+  Contains expected responses to one or more spectrum inquiries
 
   Attributes:
     version: version number of the inquiry request

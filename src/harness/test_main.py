@@ -21,7 +21,7 @@ Before running:
     the files end in .json
   - Be sure that a json file for each spectrum inquiry to be tested is in the ./inquiries directory
 
-Note: The above files and directories can be overidden via config files and cmd-line options:
+Note: The above files and directories can be overridden via config files and cmd-line options:
   - --harness_cfg path/to/config.toml will override the default harness config of cfg/harness.toml
   - --sut_cfg path/to/config.toml will override the AFC config file specified in harness.toml
   - The path and name of the function that provides the list of tests to be run can be overridden
@@ -181,12 +181,12 @@ def main():
   # Log SUT configuration
   logger.info(f'Loaded AFC connection options: {sut_config}')
 
-  # Create AFC connnection handler using loaded config
+  # Create AFC connection handler using loaded config
   afc_obj = AfcConnectionHandler(**sut_config, logger=logger)
 
   ## Configure Tests
   # If first element of tests_to_run is 'all', run all inquiries in the
-  # /inquiries directory. Otherwise just run the inquries in the list.
+  # /inquiries directory. Otherwise just run the inquiries in the list.
   logger.debug('Loading test_to_run list...')
   try:
     if harness_cfg.get('tests') is None or harness_cfg['tests'].get('module') is None:

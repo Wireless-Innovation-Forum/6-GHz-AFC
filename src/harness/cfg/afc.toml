@@ -1,16 +1,77 @@
+# This file contains the configuration options for AFC connection and authentication.
+# The configuration is divided into two sections: [connection] and [auth_info]. Details
+# of the options in each section are provided below the header for each section.
+#
+# By default, optional entires are commented out (#); to modify, remove the # at the start
+# of the line and update the placeholder value.
+#
+# Unless noted otherwise, any file paths may be specified as an absolute or a relative path.
+# If relative, path is interpreted relative to the test harness working directory
+# (typically src/harness).
+
 [connection]
+# Specifies connection configuration for AFC under test.
+# Required option:
+#   base_url - The base URL for the AFC in string form, as defined in the SDI specification.
+#              This should be a string that includes the https prefix, AFC hostname,
+#              port number (if different from the default HTTPS port), and may include
+#              one or more subpaths.
+#              Format: 'https://hostname[:port][/additional/paths]'
+#              Examples: 'https://afc.provider.com:5656'
+#                        'https://afchost.org/deeper/base/url'
+# Optional options:
+#   method_url - Overrides the final endpoint for submitting AFC requests, in string form.
+#                The SDI specification requires the method_url to be 'availableSpectrumInquiry'
+#                and thus should only be modified for testing purposes if the AFC under test is
+#                not hosted at the intended final URL.
+#                Default: 'availableSpectrumInquiry'
+#   timeout - The timeout for all network operations, in seconds.
+#             Default: 10.0
+
 base_url = 'https://localhost:4065'
 #method_url = 'availableSpectrumInquiry'
 #timeout = 10.0
 
 [auth_info]
+# Specifies the client authentication configuration for AFC under test.
+# Top level option:
+#   type - The type of client authentication used by the AFC.
+#          Allowed values: 'none', 'cert', 'custom'
+#          Default value: 'none'
+
 type = 'none' # Valid options are 'none', 'cert', and 'custom'
 
 # Additional options for auth_info.type == 'cert'
+# Required fields:
+#   options.client_cert - Path to the client certificate to be provided to the AFC, specified as a string.
+#                         This may be a combined cert/key file.
+# Conditionally required fields:
+#   options.client_key - Path to the client certificate private key file, specified as a string.
+#                        If client_cert is not a combined cert/key file, this option is required.
+
 #options.client_cert = 'auth/client_cert.cert'
 #options.client_key = 'auth/client_key.pem'
 
 # Additional options for auth_info.type == 'custom'
+# Required fields:
+#   options.auth_module - Module path for the custom authentication module, specified in python package
+#                         notation (i.e., folder separator is '.', not '/'). Specified path must be found
+#                         within the python system path at runtime. This (typically) includes paths relative
+#                         to test_main.py (src/harness). For more info on the python system path,
+#                         see https://docs.python.org/3/library/sys_path_init.html
+#   options.auth_class - The name of the class within auth_module that will handle custom client
+#                        authentication, specified as a string. This class should have an __init__() that
+#                        accepts a single argument, and the class should implement the AuthBase interface
+#                        from the requests library
+#                        (https://requests.readthedocs.io/en/latest/api/#authentication).
+#                        See the example in auth/custom_auth.py for more details.
+#   options.auth_config - Any additional options that should be passed to the initializer of auth_class.
+#                         The exact type of the value is dependent on the type expected by auth_class,
+#                         but a table/dictionary is recommended.
+#                         Note that this field is required for 'custom' auth, even if no additional parameters
+#                         are needed by auth_class. In the event no additional parameters are needed, passing
+#                         some type of empty value (e.g., '', {}) is recommended.
+
 #options.auth_module = 'auth.custom_auth' # Uses python package notation (folder separator is '.' not '/')
 #options.auth_class = 'TokenFileAuth'
 #options.auth_config = {token_file = 'auth/token_file.txt'} # This table will be passed to the __init__ method of auth_module.auth_class
