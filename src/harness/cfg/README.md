@@ -1,0 +1,1 @@
+This directory contains configuration files for the test harness and AFC communication module. Configurations are specified as [TOML files](https://toml.io/). It is recommended that you use the existing files in this directory as a template for configuring the test harness. Each file contains all allowed options, with optional fields commented out with `#`.
