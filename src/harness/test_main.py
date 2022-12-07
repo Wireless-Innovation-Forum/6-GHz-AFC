@@ -15,25 +15,38 @@
 ''' Top main script of the test harness.
 
 Before running:
-  - Edit afc.cfg to provide connection info for the SUT
-  - [TODO: Instructions if using certificates]
-  - Edit tests_to_run.py to indicate which spectrum inquiry tests to run,
-    and be sure that the files end in .json
-  - Be sure that a json file for each spectrum inquiry to be tested
-    is in the directory ./inquiries
+  - Edit cfg/harness.toml and cfg/afc.toml to configure the harness and provide connection info
+    for the SUT
+  - Edit cfg/tests_to_run.py to indicate which spectrum inquiry tests to run, and be sure that
+    the files end in .json
+  - Be sure that a json file for each spectrum inquiry to be tested is in the ./inquiries directory
+
+Note: The above files and directories can be overidden via config files and cmd-line options:
+  - --harness_cfg path/to/config.toml will override the default harness config of cfg/harness.toml
+  - --sut_cfg path/to/config.toml will override the AFC config file specified in harness.toml
+  - The path and name of the function that provides the list of tests to be run can be overridden
+    in the harness.toml file
+  - The paths used for input/output (logs, inquiries, masks, etc.) can be overridden in the
+    harness.toml file
 '''
 
 # Standard python modules
 from datetime import datetime
 from enum import Enum, unique, auto
 import glob
+from importlib import import_module
 import json
 import os
 import logging
 import sys
+from argparse import ArgumentParser
+
+# Third-party modules
+import tomli
+from requests.exceptions import JSONDecodeError
 
 # Modules specific to the AFC System test harness
-import afc
+from afc_v2 import AfcConnectionHandler
 from response_mask_validator import ResponseMaskValidator
 from response_validator import InquiryResponseValidator
 from request_validator import InquiryRequestValidator
@@ -42,7 +55,7 @@ from available_spectrum_inquiry_response import (AvailableSpectrumInquiryRespons
 from expected_inquiry_response import ExpectedSpectrumInquiryResponseMessage
 from response_mask_runner import ResponseMaskRunner
 from test_harness_logging import ConsoleInfoModuleFilter
-from tests_to_run import tests_to_run
+from cfg.tests_to_run import tests_to_run
 
 @unique
 class TestResult(Enum):
@@ -90,11 +103,35 @@ class TestResultStorage():
 def main():
   '''Sends inquiry request to SUT for each requested test and validates responses'''
 
+  ## Parse command line arguments
+  parser = ArgumentParser()
+  parser.add_argument('--harness_cfg', action='store', default='cfg/harness.toml')
+  parser.add_argument('--sut_cfg', action='store', default=None)
+  args = parser.parse_args()
+
+  # Load harness configuration
+  try:
+    with open(args.harness_cfg, 'rb') as harness_cfg_file:
+      harness_cfg = tomli.load(harness_cfg_file)
+  except tomli.TOMLDecodeError as ex:
+    print(f'Could not parse TOML in harness configuration file. Exception details: {ex}')
+    sys.exit(1)
+  except OSError as ex:
+    print(f'Could not read harness configuration file. Exception details: {ex}')
+    sys.exit(1)
+
   ## Setup directories
-  log_dir = "logs"
-  request_dir = "inquiries"
-  response_dir = "responses"
-  mask_dir = "masks"
+  paths_cfg = harness_cfg.get("paths", {})
+  log_dir = paths_cfg.get("log_dir", "logs")
+  request_dir = paths_cfg.get("inquiry_dir", "inquiries")
+  response_dir = paths_cfg.get("response_dir", "responses")
+  mask_dir = paths_cfg.get("mask_dir", "masks")
+
+  ## Choose SUT config file
+  if args.sut_cfg is not None:
+    sut_config_path = args.sut_cfg
+  else:
+    sut_config_path = harness_cfg.get('sut_config')
 
   ## Setup logging
   # Base logger object
@@ -117,18 +154,55 @@ def main():
   console_handler.setFormatter(logging.Formatter(console_log_fmt.format('Initial Setup')))
   logger.addHandler(console_handler)
 
-  ## Configure Tests
+  # Log harness configuration settings
   logger.info(f'AFC SUT Test Harness - Started {datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
+  logger.info(f'Loaded with config info: {harness_cfg}')
+  logger.info(f'Using AFC config: {sut_config_path}')
 
+  ## Configure SUT
+  if sut_config_path is None:
+    logger.fatal('SUT Config not specified in harness config or via command line. Exiting...')
+    sys.exit(1)
+  else:
+    if sut_config_path[-5:].lower() != '.toml':
+      logger.warning('Expecting .toml file for SUT config, trying to parse anyway...')
+    try:
+      with open(sut_config_path, 'rb') as sut_config_file:
+        sut_config = tomli.load(sut_config_file)
+    except tomli.TOMLDecodeError as ex:
+      logger.fatal('Could not parse TOML in harness configuration file. '
+                  f'Exception details: {ex}. Exiting...')
+      sys.exit(1)
+    except OSError as ex:
+      logger.fatal(f'Could not read harness configuration file. Exception details: {ex}.'
+                    'Exiting...')
+      sys.exit(1)
+
+  # Log SUT configuration
+  logger.info(f'Loaded AFC connection options: {sut_config}')
+
+  # Create AFC connnection handler using loaded config
+  afc_obj = AfcConnectionHandler(**sut_config, logger=logger)
+
+  ## Configure Tests
   # If first element of tests_to_run is 'all', run all inquiries in the
   # /inquiries directory. Otherwise just run the inquries in the list.
-  logger.debug(f'Loading test_to_run list...')
-  tests = tests_to_run()
-  if tests[0].lower().strip() == 'all':
-    inlist = sorted([os.path.basename(x) for x in glob.glob(os.path.join(request_dir, '*'))])
-    tests = [test[:-5] for test in inlist if test[-5:].lower() == '.json']
-    # [TODO: Properly handle .json vs .JSON]
-    # What should happen if both a.json and a.JSON exist for test "a"?
+  logger.debug('Loading test_to_run list...')
+  try:
+    if harness_cfg.get('tests') is None or harness_cfg['tests'].get('module') is None:
+      tests = tests_to_run()
+    else:
+      list_module = import_module(harness_cfg['tests']['module'])
+      tests = getattr(list_module, harness_cfg['tests']['list_func'])()
+
+    if tests[0].lower().strip() == 'all':
+      inlist = sorted([os.path.basename(x) for x in glob.glob(os.path.join(request_dir, '*'))])
+      tests = [test[:-5] for test in inlist if test[-5:].lower() == '.json']
+      # [TODO: Properly handle .json vs .JSON]
+      # What should happen if both a.json and a.JSON exist for test "a"?
+  except Exception as ex:
+    logger.fatal(f'Exception occurred while loading tests to run: {ex}. Exiting...')
+    sys.exit(1)
 
   logger.info(f'Harness will execute the following tests:\n{os.linesep.join(tests)}\n')
 
@@ -232,10 +306,30 @@ def main():
       else:
         logger.info('Request passes validation.')
 
-      # Submit the request to the SUT and read the spectrum inquiry response
-      afc_protocol, afc_admin_interface = afc.GetTestingAfc()
-      logger.info(f'Submitting request to SUT...')
-      response = afc_protocol.SpectrumInquiry(request_json)
+      # Submit the request to the SUT
+      logger.info(f'Sending request to AFC via {afc_obj.get_afc_url()}...')
+      afc_obj.send_request(request_json)
+
+      # Check for valid HTTP response and code
+      resp_code = afc_obj.get_last_http_code()
+      if resp_code is None:
+        logger.error('Failed to receive an HTTP response from the AFC. Test FAILED...\n')
+        results.add_result(test_name, TestResult.FAILED)
+        continue
+      if not 200 <= resp_code <= 299:
+        logger.error(f'Expected response HTTP code of 2XX, got: {afc_obj.get_last_http_code()}. '
+                      'Test FAILED...\n')
+        results.add_result(test_name, TestResult.FAILED)
+        continue
+
+      # Ensure response can be decoded as JSON
+      try:
+        response = afc_obj.get_last_response()
+      except JSONDecodeError as ex:
+        logger.error('Received response could not be decoded as valid JSON. Raw response test: '
+                    f'"{afc_obj.get_last_response(as_json=False)}". Test FAILED...\n')
+        results.add_result(test_name, TestResult.FAILED)
+        continue
 
       # Log received response contents
       logger.debug(f'Received response with contents:\n{json.dumps(response,indent=2)}')

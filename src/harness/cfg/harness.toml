@@ -1,0 +1,14 @@
+# Path to config file with details on connecting to AFC SUT
+sut_config = 'cfg/afc.toml'
+
+# Module defining which tests should be run
+[tests]
+module = 'cfg.tests_to_run' # Uses python package notation (folder separator is '.' not '/')
+list_func = 'tests_to_run'
+
+# Path configuration for harness input/output
+[paths]
+inquiry_dir = 'inquiries'
+response_dir = 'responses'
+mask_dir = 'masks'
+log_dir = 'logs'
