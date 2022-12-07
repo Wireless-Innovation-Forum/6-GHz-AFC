@@ -46,7 +46,7 @@ import tomli
 from requests.exceptions import JSONDecodeError
 
 # Modules specific to the AFC System test harness
-from afc_v2 import AfcConnectionHandler
+from afc import AfcConnectionHandler
 from response_mask_validator import ResponseMaskValidator
 from response_validator import InquiryResponseValidator
 from request_validator import InquiryRequestValidator
