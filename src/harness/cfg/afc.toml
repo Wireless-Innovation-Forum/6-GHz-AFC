@@ -1,0 +1,16 @@
+[connection]
+base_url = 'https://localhost:4065'
+#method_url = 'availableSpectrumInquiry'
+#timeout = 10.0
+
+[auth_info]
+type = 'none' # Valid options are 'none', 'cert', and 'custom'
+
+# Additional options for auth_info.type == 'cert'
+#options.client_cert = 'auth/client_cert.cert'
+#options.client_key = 'auth/client_key.pem'
+
+# Additional options for auth_info.type == 'custom'
+#options.auth_module = 'auth.custom_auth' # Uses python package notation (folder separator is '.' not '/')
+#options.auth_class = 'TokenFileAuth'
+#options.auth_config = {token_file = 'auth/token_file.txt'} # This table will be passed to the __init__ method of auth_module.auth_class
