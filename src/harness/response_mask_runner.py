@@ -190,7 +190,7 @@ class ResponseMaskRunner(TestHarnessLogger):
                 self._fatal('Error in mask -- found multiple channel masks with GOC '
                           f'{matching_expected_class.globalOperatingClass} and channelCfi '
                           f'{recv_cfi}')
-                raise ValueError('Respone mask has multiple channel masks with GOC '
+                raise ValueError('Response mask has multiple channel masks with GOC '
                                 f'{matching_expected_class.globalOperatingClass} and channelCfi '
                                 f'{recv_cfi}')
 

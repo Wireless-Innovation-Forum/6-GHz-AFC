@@ -1,0 +1,46 @@
+# This file contains the configuration options for the test harness.
+# The configuration is divided into three sections: top-level, [tests] and [paths].
+# Details of the options in each section are provided below the header for each section
+# (when present).
+#
+# By default, optional entires are commented out (#); to modify, remove the # at the start
+# of the line and update the placeholder value.
+#
+# Unless noted otherwise, any paths may be specified as an absolute or a relative path.
+# If relative, path is interpreted relative to the test harness working directory
+# (typically src/harness).
+
+# Top-level Options:
+#   sut_config - Path to config file with details on connecting to AFC SUT. Should be a
+#                valid TOML config file.
+
+sut_config = 'cfg/afc.toml'
+
+[tests]
+# Specifies the python function that provides the list of tests to be run.
+# Options:
+#   module - Module path for the test_to_run function, specified in python package notation
+#            (i.e., folder separator is '.', not '/'). Specified path must be found within
+#            the python system path at runtime. This (typically) includes paths relative to
+#            test_main.py (src/harness). For more info on the python system path,
+#            see https://docs.python.org/3/library/sys_path_init.html
+#   list_func - Name of the python function with module that provides a list of tests to be
+#               executed by the test harness.
+
+#module = 'cfg.tests_to_run'
+#list_func = 'tests_to_run'
+
+# Path configuration for harness input/output
+[paths]
+# Specifies the input and output directories used by the test harness.
+# Options:
+#   inquiry_dir - Path to the directory containing the available spectrum inquiry requests for
+#                 each test
+#   response_dir - Path where received inquiry responses will be stored after receipt from the AFC
+#   mask_dir - Path to the directory containing the expected inquiry responses for each test
+#   log_dir = Path where test harness output will be logged during execution
+
+#inquiry_dir = 'inquiries'
+#response_dir = 'responses'
+#mask_dir = 'masks'
+#log_dir = 'logs'

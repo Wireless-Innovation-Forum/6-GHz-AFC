@@ -141,7 +141,7 @@ class SDIValidatorBase(TestHarnessLogger):
     try:
       if freq_range.highFrequency <= freq_range.lowFrequency:
         is_valid = False
-        self._warning(f'highFreqency ({freq_range.highFrequency}) should '
+        self._warning(f'highFrequency ({freq_range.highFrequency}) should '
                       f'be greater than lowFrequency ({freq_range.lowFrequency})')
     except TypeError as ex:
       is_valid = False

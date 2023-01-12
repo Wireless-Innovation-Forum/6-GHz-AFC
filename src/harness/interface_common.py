@@ -18,7 +18,7 @@ from typing import Any
 
 @dataclass
 class FrequencyRange:
-  """Frequency Range specification for spectrum availabilty requests and responses
+  """Frequency Range specification for spectrum availability requests and responses
 
   Ranges run from lowFrequency (inclusive) up to but not including highFrequency,
   that is: the range [lowFrequency, highFrequency). Current SDI spec (v1.3) does not specify
@@ -66,7 +66,7 @@ def init_from_dicts(dicts: list[dict], cls):
   Any non-dict objects in the list are unmodified
 
   Parameters:
-    dicts (list[dict]): list of dictionarys for instantiation as objects
+    dicts (list[dict]): list of dictionaries for instantiation as objects
     cls (class type): target class for dictionary conversion
 
   Returns:
