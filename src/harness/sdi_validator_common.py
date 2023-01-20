@@ -53,7 +53,8 @@ def common_sdi_validator(specific_logic):
       is_valid = args[0].validate_types(validation_target)
       is_valid &= specific_logic(args[0], validation_target)
       return is_valid
-    args[0]._warning('Failed to validate dataclass representation')
+    args[0]._warning(f'Unable to use object as {target_class} for validation. '
+                     f'Subsequent use of this object will likely fail: {args[1]}')
     return False
   return wrapper
 
@@ -84,7 +85,7 @@ class SDIValidatorBase(TestHarnessLogger):
       try:
         conv_obj = target_type(**src_obj)
       except TypeError as err:
-        self._warning(f'Exception converting from obj dict: {err}')
+        self._warning(f'Exception converting from dict to {target_type}: {err}')
     elif isinstance(src_obj, target_type):
       conv_obj = src_obj
     else:
