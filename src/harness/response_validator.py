@@ -136,7 +136,6 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
 
     Checks:
       channelCfi and maxEirp must have equal lengths
-      channelCfi and maxEirp cannot be empty
       All values for channelCfi, maxEirp and globalOperatingClass must be valid, finite numbers
 
     Parameters:
@@ -152,12 +151,6 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
         is_valid = False
         self._warning(f'Length of channelCfi list ({info.channelCfi}) does '
                       f'not match length of maxEirp list ({info.maxEirp})')
-
-      # channelCfi and maxEirp cannot be empty
-      for field in ['channelCfi', 'maxEirp']:
-        if len(getattr(info, field)) < 1:
-          is_valid = False
-          self._warning(f'Length of {field} list must be at least 1')
     except TypeError as ex:
       is_valid = False
       self._warning(f'Could not validate lengths of channel and eirp lists: {ex}')
