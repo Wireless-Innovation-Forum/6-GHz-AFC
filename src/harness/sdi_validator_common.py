@@ -11,7 +11,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""AFC Common SDI Validation - SDI v1.3
+"""AFC Common SDI Validation - SDI v1.3.2
 
 Validation functions will exhaustively test all fields (i.e.,
 validation does not stop on the first failure, but will report all
@@ -167,28 +167,18 @@ class SDIValidatorBase(TestHarnessLogger):
     """Validates a version string
 
     Checks:
-      version must be of format n.m where n and m are non-negative integers
+      None (format requirement removed in SDI v1.3.1)
 
     Parameters:
       version (string): version string to be validated
 
     Returns:
-      True if version string is valid
-      False otherwise"""
-    is_valid = True
-    try:
-      if re.match("\\A[0-9]+\\.[0-9]+\\Z", version) is None:
-        is_valid = False
-        self._warning(f'Invalid version string format: {version}')
-    except TypeError:
-      is_valid = False
-      self._warning(f'Could not parse version string: {version}')
-
-    if is_valid and version not in self._supported_versions:
+      True always (warns if version not in supported list)"""
+    if version not in self._supported_versions:
       self._warning(f'Message version ({version}) is not in list of supported versions '
                     f'({self._supported_versions}). Errors in validation and comparison may '
                      'result.')
-    return is_valid
+    return True
 
   def validate_vendor_extension_list(self, exts: List[VendorExtension]):
     """Dispatches list of extensions to validate_vendor_extension
