@@ -36,7 +36,7 @@ Harness configuration files are located in `./cfg`. Detailed descriptions of eac
     *   By default, the `{inquiries_dir}` directory is `./inquiries` and the `{masks_dir}` directory is `./masks`.
 
 ## Specification version
-AFC communication and message validation is performed according to the current version of the Wi-Fi Alliance AFC System to AFC Device Interface Specification (v1.3.2). This specification is available from the [Wi-Fi Alliance website](https://www.wi-fi.org/discover-wi-fi/specifications) under "AFC Specification and Test Plans."
+AFC communication and message validation is performed according to the current version of the Wi-Fi Alliance AFC System to AFC Device Interface Specification (v1.3.2). Tests are executed and evaluated according to the current version fo the Wi-Fi Alliance AFC System Under Test (SUT) Compliance Test Plan (v1.3). These specifications are available from the [Wi-Fi Alliance website](https://www.wi-fi.org/discover-wi-fi/specifications) under "AFC Specification and Test Plans."
 
 ## Sample files
 Example json files for the inquiry request, response, and response mask are provided as:
@@ -46,7 +46,7 @@ Example json files for the inquiry request, response, and response mask are prov
 
 ## Harness output
 *   **Console output**
-    *   Validation warnings, mask violations, test errors, and summary of test results (passed/failed/skipped)
+    *   Validation warnings, mask violations, test errors, and summary of test results (expected/unexpected/skipped)
 *   **{logs_dir}/harness_main.log**
     *   All harness output, including ingested requests, responses, and response masks (overwritten each time `./test_main.py` is executed)
     *   By default, `logs_dir` is `./logs`

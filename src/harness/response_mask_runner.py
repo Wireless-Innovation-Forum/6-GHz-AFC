@@ -11,12 +11,12 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""AFC Spectrum Inquiry Response Mask Runner - SDI v1.3.2
+"""AFC Spectrum Inquiry Response Mask Runner - SDI v1.3.2, SUT Test Plan v1.3
 
 Mask runner functions will compare the provided response mask to a received response
-and provide a pass/fail result, logging results along the way. Comparison is performed
-exhaustively (i.e., comparison does not stop on first failure, but will report all observed
-failures. Multiple failures may be reported for the same root cause."""
+and provide an expected/unexpected result, logging results along the way. Comparison is performed
+exhaustively (i.e., comparison does not stop on first unexpected value, but will attempt to report
+all unexpected values. Multiple issues may be reported for the same root cause."""
 
 import available_spectrum_inquiry_response as afc_resp
 from response_validator import InquiryResponseValidator
@@ -77,10 +77,10 @@ class ResponseMaskRunner(TestHarnessLogger):
       else:
         self._info('Response mask passes validation')
 
-    received_passes = True
+    received_expected = True
     # requestId matches
     if expected.requestId != received.requestId:
-      received_passes = False
+      received_expected = False
       self._error((f'Received requestId ({received.requestId}) '
                    f'does not match mask ({expected.requestId})'))
     else:
@@ -88,7 +88,7 @@ class ResponseMaskRunner(TestHarnessLogger):
 
     # rulesetId matches
     if expected.rulesetId != received.rulesetId:
-      received_passes = False
+      received_expected = False
       self._error(f'Received rulesetId ({received.rulesetId}) '
                   f'does not match mask ({expected.rulesetId})')
     else:
@@ -97,7 +97,7 @@ class ResponseMaskRunner(TestHarnessLogger):
     # response.responseCode is not disallowed
     if received.response.responseCode not in expected.expectedResponseCodes:
       if received.response.responseCode in expected.disallowedResponseCodes:
-        received_passes = False
+        received_expected = False
         self._error(f'Received disallowed response code: {received.response.responseCode} '
                     f'(Expected: {expected.expectedResponseCodes}')
       else:
@@ -111,7 +111,7 @@ class ResponseMaskRunner(TestHarnessLogger):
     if received.availableFrequencyInfo is not None:
       # Does not provide availability info of basis not specified in mask
       if expected.expectedFrequencyInfo is None:
-        received_passes = False
+        received_expected = False
         self._error('Response contains frequency info but mask does not')
       else:
         for recv_freq_info in received.availableFrequencyInfo:
@@ -129,7 +129,7 @@ class ResponseMaskRunner(TestHarnessLogger):
                                     recv_freq_info.frequencyRange.highFrequency)
                 # All response frequency range PSDs are within permitted ranges
                 if not mask_info.maxPsd.in_range(recv_freq_info.maxPsd):
-                  received_passes = False
+                  received_expected = False
                   self._error(f'Mask violated on {curr_freq} - {high_end_freq} MHz. '
                               f'Permitted {recv_freq_info.maxPsd} dBm/MHz '
                               f'but expected {mask_info.maxPsd} dBm/MHz')
@@ -141,14 +141,14 @@ class ResponseMaskRunner(TestHarnessLogger):
                 break
             # No response frequency ranges overlap disallowed ranges
             else:
-              received_passes = False
+              received_expected = False
               self._error(f'Transmission disallowed on {curr_freq} - {high_disallow_freq} MHz')
               curr_freq = high_disallow_freq
 
     if received.availableChannelInfo is not None:
       # Does not provide availability info of basis not specified in mask
       if expected.expectedChannelInfo is None:
-        received_passes = False
+        received_expected = False
         self._error('Response contains channel info but mask does not')
       else:
         for recv_class_info in received.availableChannelInfo:
@@ -158,14 +158,14 @@ class ResponseMaskRunner(TestHarnessLogger):
           # No response channels are granted that are not in mask (GOC check)
           match len(matching_expected_class):
             case 0:
-              received_passes = False
+              received_expected = False
               self._error('No allowed channels provided for GOC '
                         f'{recv_class_info.globalOperatingClass}')
               break
             case 1:
               matching_expected_class = matching_expected_class[0]
             case _:
-              received_passes = False
+              received_expected = False
               self._fatal('Error in mask -- found multiple channel info objs with same '
                         f'globalOperatingClass ({recv_class_info.globalOperatingClass})')
               raise ValueError('Response mask has multiple channel info objs with same '
@@ -179,14 +179,14 @@ class ResponseMaskRunner(TestHarnessLogger):
             # No response channels are granted that are not in mask (GOC/CFI pair check)
             match len(matching_expected_info):
               case 0:
-                received_passes = False
+                received_expected = False
                 self._error(f'GOC {recv_class_info.globalOperatingClass} '
                             f'with CFI {recv_cfi} not permitted by mask')
                 break
               case 1:
                 _, eirp = matching_expected_info[0]
               case _:
-                received_passes = False
+                received_expected = False
                 self._fatal('Error in mask -- found multiple channel masks with GOC '
                           f'{matching_expected_class.globalOperatingClass} and channelCfi '
                           f'{recv_cfi}')
@@ -196,7 +196,7 @@ class ResponseMaskRunner(TestHarnessLogger):
 
             # All response channel EIRPs are within permitted ranges
             if not eirp.in_range(recv_eirp):
-              received_passes = False
+              received_expected = False
               self._error(f'AFC response for GOC {recv_class_info.globalOperatingClass} '
                           f'and CFI {recv_cfi} outside allowed range. '
                           f'Permitted {recv_eirp} dBm but expected {eirp} dBm')
@@ -213,7 +213,7 @@ class ResponseMaskRunner(TestHarnessLogger):
       self._warning('Expected response mask contains VendorExtensions, '
                     'but extensions will not be tested')
 
-    return received_passes
+    return received_expected
 
   def run_test_response_message(self, expected: afc_exp.ExpectedSpectrumInquiryResponseMessage,
           received: afc_resp.AvailableSpectrumInquiryResponseMessage, validate_objects = False):
@@ -252,13 +252,13 @@ class ResponseMaskRunner(TestHarnessLogger):
       else:
         self._info('Response message mask passes validation')
 
-    received_passes = True
+    received_expected = True
     # version matches
     # May wish to change response mask format to permit multiple version values in future
     if received.version != expected.version:
       self._error(f'Received version ({received.version}) does not match '
                   f'mask version ({expected.version})')
-      received_passes = False
+      received_expected = False
 
     # Number of responses within message matches
     if (len(received.availableSpectrumInquiryResponses) !=
@@ -266,7 +266,7 @@ class ResponseMaskRunner(TestHarnessLogger):
       self._error('Received message has unexpected number of responses. '
                  f'Received {len(received.availableSpectrumInquiryResponses)} '
                  f'but expected {len(expected.expectedSpectrumInquiryResponses)}')
-      received_passes = False
+      received_expected = False
 
     # Response checks
     for sub_exp in expected.expectedSpectrumInquiryResponses:
@@ -275,13 +275,13 @@ class ResponseMaskRunner(TestHarnessLogger):
       # Only one response per expected requestId
       if num_with_id != 1:
         self._error(f'Expected one response with ID ({sub_exp.requestId}), but found {num_with_id}')
-        received_passes = False
+        received_expected = False
       else:
         for sub_resp in received.availableSpectrumInquiryResponses:
           if sub_resp.requestId == sub_exp.requestId:
             # Each expected response satisfies the corresponding response mask
             if not self.run_test_response(sub_exp, sub_resp):
-              received_passes = False
+              received_expected = False
               self._error(f'Response for requestID ({sub_resp.requestId}) '
                            'violated expected response mask')
             else:
@@ -294,7 +294,7 @@ class ResponseMaskRunner(TestHarnessLogger):
                         for exp_resp in expected.expectedSpectrumInquiryResponses)
       if num_with_id == 0:
         self._error(f'Received response with unexpected ID ({sub_resp.requestId})')
-        received_passes = False
+        received_expected = False
 
     # Ignore VendorExtensions
     if received.vendorExtensions is not None:
@@ -302,7 +302,7 @@ class ResponseMaskRunner(TestHarnessLogger):
     if expected.vendorExtensions is not None:
       self._warning('Expected response mask contains VendorExtensions, but extensions will not be '
                     'tested')
-    return received_passes
+    return received_expected
 
 def main():
   """Demonstrates use of the mask runner functions"""

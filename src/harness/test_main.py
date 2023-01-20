@@ -61,12 +61,12 @@ from cfg.tests_to_run import tests_to_run
 class TestResult(Enum):
   """Enum for defining results of SUT tests
 
-  PASSED:  Received response fits the response mask
-  FAILED:  Received response violates the response mask
+  EXPECTED:  Received response fits the response mask
+  UNEXPECTED:  Received response violates the response mask
   SKIPPED: An error was encountered in parsing the request, response, or response mask.
-           No determination about PASSED/FAILED is implied by a SKIPPED result."""
-  PASSED  = auto()
-  FAILED  = auto()
+           No determination about EXPECTED/UNEXPECTED is implied by a SKIPPED result."""
+  EXPECTED  = auto()
+  UNEXPECTED  = auto()
   SKIPPED = auto()
 
 class TestResultStorage():
@@ -89,16 +89,16 @@ class TestResultStorage():
     self._count_results[test_result] += 1
 
   def named_results(self):
-    """Get list of all passed/failed/skipped tests by name as string"""
-    return (f" Passed tests: {', '.join(self._named_results[TestResult.PASSED])}\n"
-            f" Failed tests: {', '.join(self._named_results[TestResult.FAILED])}\n"
-            f"Skipped tests: {', '.join(self._named_results[TestResult.SKIPPED])}")
+    """Get list of all expected/unexpected/skipped test results by name as string"""
+    return (f"  Expected results: {', '.join(self._named_results[TestResult.EXPECTED])}\n"
+            f"Unexpected results: {', '.join(self._named_results[TestResult.UNEXPECTED])}\n"
+            f"     Skipped tests: {', '.join(self._named_results[TestResult.SKIPPED])}")
 
   def count_results(self):
-    """Get summary of all passed/failed/skipped tests by # of occurrence as string"""
-    return (f' Tests Passed: {self._count_results[TestResult.PASSED]}\n'
-            f' Tests Failed: {self._count_results[TestResult.FAILED]}\n'
-            f'Tests Skipped: {self._count_results[TestResult.SKIPPED]}')
+    """Get summary of all expected/unexpected/skipped tests by # of occurrence as string"""
+    return (f'  Expected results: {self._count_results[TestResult.EXPECTED]}\n'
+            f'Unexpected results: {self._count_results[TestResult.UNEXPECTED]}\n'
+            f'     Skipped tests: {self._count_results[TestResult.SKIPPED]}')
 
 def main():
   '''Sends inquiry request to SUT for each requested test and validates responses'''
@@ -293,18 +293,18 @@ def main():
       # Validate request JSON
       logger.debug('Validating imported request JSON...')
       if not request_validator.validate_available_spectrum_inquiry_response_message(request_json):
-        logger.info('Request does not pass validation--checking if mask expects an error...')
+        logger.info('Request does not pass SDI validation--checking if mask expects an error...')
         if any(any(ResponseCode.get_raw_value(code) != ResponseCode.SUCCESS.value
                    for code in exp.expectedResponseCodes)
                for exp in mask_obj.expectedSpectrumInquiryResponses):
           logger.info('Mask expects an error code, so sending invalid request anyway.')
         else:
-          logger.fatal('Request does not pass validation, but response mask doesn\'t expect an '
-                       'error. Test SKIPPED.\n')
+          logger.fatal('Request does not pass SDI validation, but response mask doesn\'t expect '
+                       'an error. Test SKIPPED.\n')
           results.add_result(test_name, TestResult.SKIPPED)
           continue
       else:
-        logger.info('Request passes validation.')
+        logger.info('Request passes SDI validation.')
 
       # Submit the request to the SUT
       logger.info(f'Sending request to AFC via {afc_obj.get_afc_url()}...')
@@ -313,13 +313,13 @@ def main():
       # Check for valid HTTP response and code
       resp_code = afc_obj.get_last_http_code()
       if resp_code is None:
-        logger.error('Failed to receive an HTTP response from the AFC. Test FAILED...\n')
-        results.add_result(test_name, TestResult.FAILED)
+        logger.error('Failed to receive an HTTP response from the AFC. Result UNEXPECTED.\n')
+        results.add_result(test_name, TestResult.UNEXPECTED)
         continue
       if not 200 <= resp_code <= 299:
         logger.error(f'Expected response HTTP code of 2XX, got: {afc_obj.get_last_http_code()}. '
-                      'Test FAILED...\n')
-        results.add_result(test_name, TestResult.FAILED)
+                      'Result UNEXPECTED.\n')
+        results.add_result(test_name, TestResult.UNEXPECTED)
         continue
 
       # Ensure response can be decoded as JSON
@@ -327,8 +327,8 @@ def main():
         response = afc_obj.get_last_response()
       except JSONDecodeError as ex:
         logger.error('Received response could not be decoded as valid JSON. Raw response test: '
-                    f'"{afc_obj.get_last_response(as_json=False)}". Test FAILED...\n')
-        results.add_result(test_name, TestResult.FAILED)
+                    f'"{afc_obj.get_last_response(as_json=False)}". Result UNEXPECTED.\n')
+        results.add_result(test_name, TestResult.UNEXPECTED)
         continue
 
       # Log received response contents
@@ -357,11 +357,11 @@ def main():
       logger.debug(f'Comparing response to mask...')
       try:
         if mask_runner.run_test_response_message(mask_obj, response_obj, validate_objects=False):
-          logger.info('Response meets mask requirements. Test PASSED.\n')
-          results.add_result(test_name, TestResult.PASSED)
+          logger.info('Response meets mask requirements. Result EXPECTED.\n')
+          results.add_result(test_name, TestResult.EXPECTED)
         else:
-          logger.error('Response does not meet mask requirements. Test FAILED.\n')
-          results.add_result(test_name, TestResult.FAILED)
+          logger.error('Response does not meet mask requirements. Result UNEXPECTED.\n')
+          results.add_result(test_name, TestResult.UNEXPECTED)
       except Exception as ex:
         logger.fatal(f'Encountered exception while evaluating response: {ex}. Test SKIPPED.\n')
         results.add_result(test_name, TestResult.SKIPPED)
