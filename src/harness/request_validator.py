@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-"""AFC Spectrum Inquiry Request Validation - SDI v1.3
+"""AFC Spectrum Inquiry Request Validation - SDI v1.3.2
 
 Validates a text file containing a spectrum inquiry request in the WFA
 standard format. Checks:

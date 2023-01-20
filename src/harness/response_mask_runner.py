@@ -11,7 +11,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""AFC Spectrum Inquiry Response Mask Runner - SDI v1.3
+"""AFC Spectrum Inquiry Response Mask Runner - SDI v1.3.2
 
 Mask runner functions will compare the provided response mask to a received response
 and provide a pass/fail result, logging results along the way. Comparison is performed
