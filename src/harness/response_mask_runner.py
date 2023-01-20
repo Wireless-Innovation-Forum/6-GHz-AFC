@@ -152,16 +152,20 @@ class ResponseMaskRunner(TestHarnessLogger):
         self._error('Response contains channel info but mask does not')
       else:
         for recv_class_info in received.availableChannelInfo:
+          # Get any non-placeholder mask objects with same GOC
           matching_expected_class = [exp for exp in expected.expectedChannelInfo
                                     if exp.globalOperatingClass ==
-                                        recv_class_info.globalOperatingClass]
+                                        recv_class_info.globalOperatingClass and
+                                        (len(exp.channelCfi) != 0 or len(exp.maxEirp) != 0)]
           # No response channels are granted that are not in mask (GOC check)
           match len(matching_expected_class):
             case 0:
-              received_expected = False
-              self._error('No allowed channels provided for GOC '
-                        f'{recv_class_info.globalOperatingClass}')
-              break
+              # Ensure received is not an empty placeholder (allowed)
+              if len(recv_class_info.channelCfi) != 0 or len(recv_class_info.maxEirp) != 0:
+                received_expected = False
+                self._error('No allowed channels provided for GOC '
+                           f'{recv_class_info.globalOperatingClass}, but response includes them')
+              continue
             case 1:
               matching_expected_class = matching_expected_class[0]
             case _:
@@ -181,8 +185,8 @@ class ResponseMaskRunner(TestHarnessLogger):
               case 0:
                 received_expected = False
                 self._error(f'GOC {recv_class_info.globalOperatingClass} '
-                            f'with CFI {recv_cfi} not permitted by mask')
-                break
+                            f'with CFI {recv_cfi} not permitted by mask, but response permits it')
+                continue
               case 1:
                 _, eirp = matching_expected_info[0]
               case _:
