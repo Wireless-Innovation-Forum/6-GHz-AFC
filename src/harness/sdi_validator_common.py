@@ -11,7 +11,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""AFC Common SDI Validation - SDI v1.3.2
+"""AFC Common SDI Validation - SDI Protocol v1.3
 
 Validation functions will exhaustively test all fields (i.e.,
 validation does not stop on the first failure, but will report all

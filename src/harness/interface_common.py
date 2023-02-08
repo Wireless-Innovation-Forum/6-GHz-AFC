@@ -11,7 +11,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""AFC System to AFC Device Interface Common Classes - SDI v1.3.2"""
+"""AFC System to AFC Device Interface Common Classes - SDI Protocol v1.3"""
 
 from dataclasses import dataclass
 from typing import Any
@@ -21,9 +21,9 @@ class FrequencyRange:
   """Frequency Range specification for spectrum availability requests and responses
 
   Ranges run from lowFrequency (inclusive) up to but not including highFrequency,
-  that is: the range [lowFrequency, highFrequency). Current SDI spec (v1.3.2) does not specify
-  this interpretation, but it is implied by the spec's sample_response (contiguous frequency
-  ranges sharing a high/low freq value)
+  that is: the range [lowFrequency, highFrequency). Current SDI spec (as of protocol v1.3) does not
+  specify this interpretation, but it is implied by the spec's sample_response (contiguous
+  frequency ranges sharing a high/low freq value)
 
   Attributes:
     lowFrequency: lowest frequency in the range, expressed in MHz
