@@ -21,8 +21,8 @@ class FrequencyRange:
   """Frequency Range specification for spectrum availability requests and responses
 
   Ranges run from lowFrequency (inclusive) up to but not including highFrequency,
-  that is: the range [lowFrequency, highFrequency). Current SDI spec (as of protocol v1.3) does not
-  specify this interpretation, but it is implied by the spec's sample_response (contiguous
+  that is: the range [lowFrequency, highFrequency). Current SDI spec (as of protocol document v1.4)
+  does not specify this interpretation, but it is implied by the spec's sample_response (contiguous
   frequency ranges sharing a high/low freq value)
 
   Attributes:
