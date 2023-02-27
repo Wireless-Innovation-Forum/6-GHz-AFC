@@ -4,11 +4,11 @@
     {
       "requestId": "REQ-SIP4",
       "deviceDescriptor": {
-        "serialNumber": "SN-SIP4",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-SIP4"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [

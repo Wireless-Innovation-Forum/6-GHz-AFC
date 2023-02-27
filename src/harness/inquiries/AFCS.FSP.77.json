@@ -4,11 +4,11 @@
     {
       "requestId": "REQ-FSP77",
       "deviceDescriptor": {
-        "serialNumber": "SN-FSP77",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-FSP77"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [

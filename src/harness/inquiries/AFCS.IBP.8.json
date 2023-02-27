@@ -4,11 +4,11 @@
     {
       "requestId": "REQ-IBP8",
       "deviceDescriptor": {
-        "serialNumber": "SN-IBP8",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-IBP8"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [

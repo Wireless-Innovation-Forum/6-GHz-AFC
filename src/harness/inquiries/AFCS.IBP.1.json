@@ -4,11 +4,11 @@
     {
       "requestId": "REQ-IBP1",
       "deviceDescriptor": {
-        "serialNumber": "SN-IBP1",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-IBP1"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [
@@ -24,7 +24,7 @@
         "ellipse": {
           "center": {
             "longitude": -84.331771,
-            "latitude": 46.596068
+            "latitude": 46.4968
           },
           "majorAxis": 30,
           "minorAxis": 30,
