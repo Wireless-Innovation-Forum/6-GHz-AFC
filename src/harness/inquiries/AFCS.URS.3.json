@@ -4,11 +4,11 @@
     {
       "requestId": "REQ-URS3",
       "deviceDescriptor": {
-        "serialNumber": "SN-URS3",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-URS3"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [

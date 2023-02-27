@@ -2,7 +2,7 @@
   "version": "1.3",
   "availableSpectrumInquiryRequests": [
     {
-      "requestId": "REQ-FSP64",
+      "requestId": "REQ-SIP16",
       "deviceDescriptor": {
         "serialNumber": "REG123",
         "certificationId": [
@@ -17,20 +17,20 @@
       },
       "location": {
         "elevation": {
-          "height": 3.0,
+          "height": 14.2,
           "heightType": "AGL",
-          "verticalUncertainty": 2
+          "verticalUncertainty": 1
         },
         "ellipse": {
           "center": {
-            "longitude": -120.695567,
-            "latitude": 38.816705
+            "longitude": -119.62,
+            "latitude": 48.996
           },
-          "majorAxis": 100,
-          "minorAxis": 50,
-          "orientation": 45.0
+          "majorAxis": 10,
+          "minorAxis": 10,
+          "orientation": 0.0
         },
-        "indoorDeployment": 1
+        "indoorDeployment": 0
       },
       "inquiredFrequencyRange": [
         {

@@ -40,6 +40,8 @@ AFC communication and message validation is performed according to the current v
 
 Tests are executed and evaluated according to the current version of the Wi-Fi Alliance AFC System Under Test (SUT) Compliance Test Plan (v1.4).
 
+JSON-formatted test vector inquries provided in `./inquiries` are from the Wi-Fi Alliance AFC System (SUT) Compliance Test Vector Requests (v1.1). 
+
 These specifications and test vectors are available from the [Wi-Fi Alliance website](https://www.wi-fi.org/discover-wi-fi/specifications) under "AFC Specification and Test Plans."
 
 ## Sample files

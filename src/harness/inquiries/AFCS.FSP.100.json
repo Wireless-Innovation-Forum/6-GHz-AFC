@@ -4,11 +4,11 @@
     {
       "requestId": "REQ-FSP1",
       "deviceDescriptor": {
-        "serialNumber": "SN-FSP1",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-FSP1"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [
@@ -63,11 +63,11 @@
     {
       "requestId": "REQ-FSP2",
       "deviceDescriptor": {
-        "serialNumber": "SN-FSP2",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-FSP2"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [
@@ -122,11 +122,11 @@
     {
       "requestId": "REQ-FSP3",
       "deviceDescriptor": {
-        "serialNumber": "SN-FSP3",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-FSP3"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [
@@ -181,11 +181,11 @@
     {
       "requestId": "REQ-FSP4",
       "deviceDescriptor": {
-        "serialNumber": "SN-FSP4",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-FSP4"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [
@@ -240,11 +240,11 @@
     {
       "requestId": "REQ-FSP5",
       "deviceDescriptor": {
-        "serialNumber": "SN-FSP5",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-FSP5"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [
@@ -299,11 +299,11 @@
     {
       "requestId": "REQ-FSP6",
       "deviceDescriptor": {
-        "serialNumber": "SN-FSP6",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-FSP6"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [
@@ -358,11 +358,11 @@
     {
       "requestId": "REQ-FSP7",
       "deviceDescriptor": {
-        "serialNumber": "SN-FSP7",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC",
-            "id": "FCCID-FSP7"
+            "id": "FCCID-REG123"
           }
         ],
         "rulesetIds": [

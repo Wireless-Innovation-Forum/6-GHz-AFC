@@ -4,7 +4,7 @@
     {
       "requestId": "REQ-URS1",
       "deviceDescriptor": {
-        "serialNumber": "SN-URS1",
+        "serialNumber": "REG123",
         "certificationId": [
           {
             "nra": "FCC"
