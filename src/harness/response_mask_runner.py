@@ -41,6 +41,7 @@ class ResponseMaskRunner(TestHarnessLogger):
       rulesetId matches
       response.responseCode is not disallowed (permits expected codes or vendor extension codes)
         Logs warning on vendor extension codes--may merit manual review
+      Availability info is not provided unless response.responseCode is SUCCESS
       No response frequency ranges overlap disallowed ranges
       All response frequency range PSDs are within permitted ranges
       No response channels are granted that are not in mask
@@ -109,6 +110,11 @@ class ResponseMaskRunner(TestHarnessLogger):
 
     # Frequency range checks
     if received.availableFrequencyInfo is not None:
+      # Ensure that response code is success
+      if (afc_resp.ResponseCode.get_raw_value(received.response.responseCode) !=
+          afc_resp.ResponseCode.SUCCESS.value):
+        received_expected = False
+        self._error('Response contains frequency info but did not indicate SUCCESS')
       # Does not provide availability info of basis not specified in mask
       if expected.expectedFrequencyInfo is None:
         received_expected = False
@@ -146,6 +152,11 @@ class ResponseMaskRunner(TestHarnessLogger):
               curr_freq = high_disallow_freq
 
     if received.availableChannelInfo is not None:
+      # Ensure that response code is success
+      if (afc_resp.ResponseCode.get_raw_value(received.response.responseCode) !=
+          afc_resp.ResponseCode.SUCCESS.value):
+        received_expected = False
+        self._error('Response contains channel info but did not indicate SUCCESS')
       # Does not provide availability info of basis not specified in mask
       if expected.expectedChannelInfo is None:
         received_expected = False
