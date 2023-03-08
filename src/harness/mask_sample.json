@@ -75,22 +75,22 @@
                         },
                         {
                             "nominalValue": 36,
-                            "upperBound": 36.5,
+                            "upperBound": 36,
                             "lowerBound": 35.5
                         },
                         {
                             "nominalValue": 36,
-                            "upperBound": 36.5,
+                            "upperBound": 36,
                             "lowerBound": 35.5
                         },
                         {
                             "nominalValue": 36,
-                            "upperBound": 36.5,
+                            "upperBound": 36,
                             "lowerBound": 35.5
                         },
                         {
                             "nominalValue": 36,
-                            "upperBound": 36.5,
+                            "upperBound": 36,
                             "lowerBound": 35.5
                         },
                         {
@@ -100,7 +100,7 @@
                         },
                         {
                             "nominalValue": 36,
-                            "upperBound": 36.5,
+                            "upperBound": 36,
                             "lowerBound": 35.5
                         }
                     ]
@@ -113,7 +113,7 @@
                     "maxEirp": [
                         {
                             "nominalValue": 35,
-                            "upperBound": 36.5,
+                            "upperBound": 36,
                             "lowerBound": 33
                         }
                     ]
