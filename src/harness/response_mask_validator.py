@@ -164,7 +164,6 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
       At least one expectedResponseCode is given
       expectedResponseCodes are valid
       If SUCCESS is expected response code:
-        No other codes are expected
         At least one of expectedChannelInfo and expectedFrequencyInfo is given
       If SUCCESS is not expected response code:
         No availability info is given
@@ -198,10 +197,6 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
         # If SUCCESS is expected response code:
         if any(afc_exp.afc_resp.ResponseCode.get_raw_value(code) ==
               afc_exp.afc_resp.ResponseCode.SUCCESS.value for code in exp.expectedResponseCodes):
-          # No other codes are expected
-          if len(exp.expectedResponseCodes) > 1:
-            is_valid = False
-            self._warning('Cannot expect SUCCESS and other response codes in the same message')
 
           # At least one of expectedChannelInfo and expectedFrequencyInfo is given
           if exp.expectedChannelInfo is None and exp.expectedFrequencyInfo is None:

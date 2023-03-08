@@ -130,7 +130,7 @@ class ExpectedSpectrumInquiryResponse:
   """
   requestId: str
   rulesetId: str
-  expectedResponseCodes: list[afc_resp.ResponseCode]
+  expectedResponseCodes: list[Union[afc_resp.ResponseCode, int]]
   expectedFrequencyInfo: list[ExpectedAvailableFrequencyInfo] = None
   expectedChannelInfo: list[ExpectedAvailableChannelInfo] = None
   vendorExtensions: list[afc_resp.VendorExtension] = None
