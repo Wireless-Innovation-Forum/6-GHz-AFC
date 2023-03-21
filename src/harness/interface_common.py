@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from typing import Any
+import enum
 
 @dataclass
 class FrequencyRange:
@@ -47,6 +48,57 @@ class FrequencyRange:
 
   def __str__(self):
     return f"lowFrequency: {self.lowFrequency}\nhighFrequency: {self.highFrequency}"
+
+@enum.unique
+class ResponseCode(enum.Enum):
+  """Available Spectrum Inquiry Response Code Definition
+
+  Reports success or failure of an available spectrum inquiry
+
+  Code -1 represents a general failure
+  Code  0 represents success
+  Codes 100-199 represent errors related to the protocol
+  Codes 300-399 represent errors specific to message exchanges
+    for the inquiry
+  """
+
+  GENERAL_FAILURE = -1
+  SUCCESS = 0
+  VERSION_NOT_SUPPORTED = 100
+  DEVICE_DISALLOWED = 101
+  MISSING_PARAM = 102
+  INVALID_VALUE = 103
+  UNEXPECTED_PARAM = 106
+  UNSUPPORTED_SPECTRUM = 300
+  UNSUPPORTED_BASIS = 301
+  # Other vendor specific codes are allowed by specification
+  # Adding new enum values at runtime not supported by stdlib enum
+  # Could add vendor codes to list or use 3rd party aenum class to add
+  #   unexpected codes at runtime
+  # Currently, Response object creation will try to reference ResponseCode
+  #   enum--if it fails, it falls back to a plain int. All validation checks
+  #   are performed against the enum's value using get_raw_value
+  #VENDOR_SPECIFIC = "VENDOR_SPECIFIC"
+
+  @classmethod
+  def get_raw_value(cls, code):
+    """Returns the raw value of an unknown-typed ResponseCode
+
+    Parameters:
+      code (ResponseCode or int): response code to convert to raw value
+
+    Returns:
+      raw response code values as an int
+    """
+    if isinstance(code, int):
+      return code
+    elif isinstance(code, ResponseCode):
+      return code.value
+    else:
+      return None
+
+  def __repr__(self):
+    return f"ResponseCode({self.value})"
 
 @dataclass
 class VendorExtension:

@@ -25,7 +25,6 @@ Any combination of these arguments is permitted. For example:
 ### Required configuration
 The only required option that must be configured before use is setting the address for the AFC SUT. By default, this option is configured in `./cfg/afc.toml` using the `base_url` field (line 31).
 
-
 ### Authentication methods
 The test harness supports client authentication using client certificates and python classes that accept a single argument to `__init__()` and follow the interface set by the [requests library's AuthBase interface](https://requests.readthedocs.io/en/latest/user/authentication/#new-forms-of-authentication). Files related to authentication are stored in `./auth`. An example authentication method using a file-based bearer token is included in `./auth/custom_auth.py`. This file can be used as a starting place for other authentication methods.
 ### Configuration file descriptions
@@ -40,7 +39,7 @@ AFC communication and message validation is performed according to the current v
 
 Tests are executed and evaluated according to the current version of the Wi-Fi Alliance AFC System Under Test (SUT) Compliance Test Plan (v1.4).
 
-JSON-formatted test vector inquries provided in `./inquiries` are from the Wi-Fi Alliance AFC System (SUT) Compliance Test Vector Requests (v1.1). 
+JSON-formatted test vector inquiries provided in `./inquiries` are from the Wi-Fi Alliance AFC System (SUT) Compliance Test Vector Requests (v1.1). 
 
 These specifications and test vectors are available from the [Wi-Fi Alliance website](https://www.wi-fi.org/discover-wi-fi/specifications) under "AFC Specification and Test Plans."
 

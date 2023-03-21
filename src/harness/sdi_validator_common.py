@@ -17,7 +17,6 @@ Validation functions will exhaustively test all fields (i.e.,
 validation does not stop on the first failure, but will report all
 observed failures"""
 
-import re
 import typing
 import dataclasses
 from typing import List

@@ -22,6 +22,7 @@ import available_spectrum_inquiry_response as afc_resp
 from response_validator import InquiryResponseValidator
 from response_mask_validator import ResponseMaskValidator
 import expected_inquiry_response as afc_exp
+from interface_common import ResponseCode
 from test_harness_logging import TestHarnessLogger
 
 class ResponseMaskRunner(TestHarnessLogger):
@@ -111,8 +112,7 @@ class ResponseMaskRunner(TestHarnessLogger):
     # Frequency range checks
     if received.availableFrequencyInfo is not None:
       # Ensure that response code is success
-      if (afc_resp.ResponseCode.get_raw_value(received.response.responseCode) !=
-          afc_resp.ResponseCode.SUCCESS.value):
+      if ResponseCode.get_raw_value(received.response.responseCode) != ResponseCode.SUCCESS.value:
         received_expected = False
         self._error('Response contains frequency info but did not indicate SUCCESS')
       # Does not provide availability info of basis not specified in mask
@@ -153,8 +153,7 @@ class ResponseMaskRunner(TestHarnessLogger):
 
     if received.availableChannelInfo is not None:
       # Ensure that response code is success
-      if (afc_resp.ResponseCode.get_raw_value(received.response.responseCode) !=
-          afc_resp.ResponseCode.SUCCESS.value):
+      if ResponseCode.get_raw_value(received.response.responseCode) != ResponseCode.SUCCESS.value:
         received_expected = False
         self._error('Response contains channel info but did not indicate SUCCESS')
       # Does not provide availability info of basis not specified in mask
@@ -246,7 +245,7 @@ class ResponseMaskRunner(TestHarnessLogger):
 
     Parameters:
       expected (ExpectedSpectrumInquiryResponseMessage): Mask used as standard for comparison
-      received (AvailableSpectrumInquiryResponseMEssage): Message subject to comparison
+      received (AvailableSpectrumInquiryResponseMessage): Message subject to comparison
       validate_objects (Boolean): Enables validation of expected and received prior to comparison
 
     Returns:
