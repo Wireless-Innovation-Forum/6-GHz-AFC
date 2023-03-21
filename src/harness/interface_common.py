@@ -13,7 +13,9 @@
 #    limitations under the License.
 """AFC System to AFC Device Interface Common Classes - SDI Protocol v1.3"""
 
+import dataclasses
 from dataclasses import dataclass
+import json
 from typing import Any
 import enum
 
@@ -124,3 +126,44 @@ def init_from_dicts(dicts: list[dict], cls):
   Returns:
     dicts with all dictionaries converted to objects of type cls"""
   return [cls(**x) if isinstance(x, dict) else x for x in dicts]
+
+class JSONEncoderSDI(json.JSONEncoder):
+  """Modified version of JSONEncoder that serializes dataclasses and SDI-specific behavior."""
+  def default(self, o):
+    # Handle dataclasses by converting to dict and passing through clean_nones
+    if dataclasses.is_dataclass(o):
+      return self.clean_nones(dataclasses.asdict(o))
+    # Handle ResponseCodes by using the raw numeric value
+    elif isinstance(o, ResponseCode):
+      return ResponseCode.get_raw_value(o)
+    return super().default(o)
+
+  @classmethod
+  def clean_nones(cls, value):
+    """Recursively remove all None values from dictionaries and lists, and returns
+    the result as a new dictionary or list.
+    Also removes -Infinity to handle ExpectedPowerRange lowerBound.
+    Empty lists are left unmodified.
+
+    Parameters:
+      value: variable to be filtered
+
+    Returns:
+      Filtered variable with Nones and -infs removed"""
+    if isinstance(value, list):
+      return [cls.clean_nones(x) for x in value if x is not None]
+    elif isinstance(value, dict):
+      try:
+        return {
+          key: cls.clean_nones(val)
+          for key, val in value.items()
+          if val is not None and val != float('-inf')
+        }
+      except:
+        return {
+          key: cls.clean_nones(val)
+          for key, val in value.items()
+          if val is not None and val != float('-inf')
+        }
+    else:
+      return value
