@@ -39,7 +39,7 @@ DEBUG = False
 class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
   """Provides validation functions for AFC Inquiry-specific types"""
 
-  def validate_available_spectrum_inquiry_response_message(self, request):
+  def validate_available_spectrum_inquiry_request_message(self, request):
     if DEBUG:
       print(inspect.currentframe().f_code.co_name)
 
@@ -592,7 +592,7 @@ def main():
       is_valid = False
 
   if is_valid:
-    if validator.validate_available_spectrum_inquiry_response_message(request):
+    if validator.validate_available_spectrum_inquiry_request_message(request):
       log_message = 'No errors found in ' + in_file
       logger.info(log_message)
     else:

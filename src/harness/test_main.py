@@ -292,7 +292,7 @@ def main():
 
       # Validate request JSON
       logger.debug('Validating imported request JSON...')
-      if not request_validator.validate_available_spectrum_inquiry_response_message(request_json):
+      if not request_validator.validate_available_spectrum_inquiry_request_message(request_json):
         logger.info('Request does not pass SDI validation--checking if mask expects an error...')
         if any(any(ResponseCode.get_raw_value(code) != ResponseCode.SUCCESS.value
                    for code in exp.expectedResponseCodes)
