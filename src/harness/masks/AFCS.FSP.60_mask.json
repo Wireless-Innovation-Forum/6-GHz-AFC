@@ -1,0 +1,706 @@
+{
+  "version": "1.4",
+  "expectedSpectrumInquiryResponses": [
+    {
+      "requestId": "REQ-FSP60",
+      "rulesetId": "US_47_CFR_PART_15_SUBPART_E",
+      "expectedFrequencyInfo": [
+        {
+          "frequencyRange": {
+            "lowFrequency": 5925,
+            "highFrequency": 5930
+          },
+          "maxPsd": {
+            "nominalValue": 23.0,
+            "upperBound": 23.0
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 5930,
+            "highFrequency": 5961
+          },
+          "maxPsd": {
+            "nominalValue": -13.8,
+            "upperBound": -11.8
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 5961,
+            "highFrequency": 5989
+          },
+          "maxPsd": {
+            "nominalValue": 23.0,
+            "upperBound": 23.0
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 5989,
+            "highFrequency": 6050
+          },
+          "maxPsd": {
+            "nominalValue": -16.0,
+            "upperBound": -14.0
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6050,
+            "highFrequency": 6107
+          },
+          "maxPsd": {
+            "nominalValue": -13.7,
+            "upperBound": -11.7
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6107,
+            "highFrequency": 6168
+          },
+          "maxPsd": {
+            "nominalValue": -15.9,
+            "upperBound": -13.9
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6168,
+            "highFrequency": 6182
+          },
+          "maxPsd": {
+            "nominalValue": 23.0,
+            "upperBound": 23.0
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6182,
+            "highFrequency": 6213
+          },
+          "maxPsd": {
+            "nominalValue": -29.9,
+            "upperBound": -27.9
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6213,
+            "highFrequency": 6241
+          },
+          "maxPsd": {
+            "nominalValue": 2.1,
+            "upperBound": 4.1
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6241,
+            "highFrequency": 6302
+          },
+          "maxPsd": {
+            "nominalValue": -30.1,
+            "upperBound": -28.1
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6302,
+            "highFrequency": 6331
+          },
+          "maxPsd": {
+            "nominalValue": -29.7,
+            "upperBound": -27.7
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6331,
+            "highFrequency": 6359
+          },
+          "maxPsd": {
+            "nominalValue": -29.6,
+            "upperBound": -27.6
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6359,
+            "highFrequency": 6391
+          },
+          "maxPsd": {
+            "nominalValue": -29.8,
+            "upperBound": -27.8
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6391,
+            "highFrequency": 6420
+          },
+          "maxPsd": {
+            "nominalValue": -29.7,
+            "upperBound": -27.7
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6420,
+            "highFrequency": 6425
+          },
+          "maxPsd": {
+            "nominalValue": 23.0,
+            "upperBound": 23.0
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6525,
+            "highFrequency": 6580
+          },
+          "maxPsd": {
+            "nominalValue": 23.0,
+            "upperBound": 23.0
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6580,
+            "highFrequency": 6610
+          },
+          "maxPsd": {
+            "nominalValue": -28.9,
+            "upperBound": -26.9
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6610,
+            "highFrequency": 6630
+          },
+          "maxPsd": {
+            "nominalValue": 23.0,
+            "upperBound": 23.0
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6630,
+            "highFrequency": 6640
+          },
+          "maxPsd": {
+            "nominalValue": 2.4,
+            "upperBound": 4.4
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6640,
+            "highFrequency": 6670
+          },
+          "maxPsd": {
+            "nominalValue": -28.8,
+            "upperBound": -26.8
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6670,
+            "highFrequency": 6710
+          },
+          "maxPsd": {
+            "nominalValue": 23.0,
+            "upperBound": 23.0
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6710,
+            "highFrequency": 6740
+          },
+          "maxPsd": {
+            "nominalValue": 15.0,
+            "upperBound": 17.0
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6740,
+            "highFrequency": 6770
+          },
+          "maxPsd": {
+            "nominalValue": -12.5,
+            "upperBound": -10.5
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6770,
+            "highFrequency": 6790
+          },
+          "maxPsd": {
+            "nominalValue": 15.1,
+            "upperBound": 17.1
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6790,
+            "highFrequency": 6800
+          },
+          "maxPsd": {
+            "nominalValue": 2.3,
+            "upperBound": 4.3
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6800,
+            "highFrequency": 6830
+          },
+          "maxPsd": {
+            "nominalValue": -12.4,
+            "upperBound": -10.4
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6830,
+            "highFrequency": 6840
+          },
+          "maxPsd": {
+            "nominalValue": 16.3,
+            "upperBound": 18.3
+          }
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6840,
+            "highFrequency": 6875
+          },
+          "maxPsd": {
+            "nominalValue": 23.0,
+            "upperBound": 23.0
+          }
+        }
+      ],
+      "expectedChannelInfo": [
+        {
+          "globalOperatingClass": 131,
+          "channelCfi": [
+            1,
+            5,
+            9,
+            13,
+            17,
+            21,
+            25,
+            29,
+            33,
+            37,
+            41,
+            45,
+            49,
+            53,
+            57,
+            61,
+            65,
+            69,
+            73,
+            77,
+            81,
+            85,
+            89,
+            93,
+            117,
+            121,
+            125,
+            129,
+            133,
+            137,
+            141,
+            145,
+            149,
+            153,
+            157,
+            161,
+            165,
+            169,
+            173,
+            177,
+            181
+          ],
+          "maxEirp": [
+            {
+              "nominalValue": -0.8,
+              "upperBound": 1.2
+            },
+            {
+              "nominalValue": 19.7,
+              "upperBound": 21.7
+            },
+            {
+              "nominalValue": -3.0,
+              "upperBound": -1.0
+            },
+            {
+              "nominalValue": -3.0,
+              "upperBound": -1.0
+            },
+            {
+              "nominalValue": -3.0,
+              "upperBound": -1.0
+            },
+            {
+              "nominalValue": -3.0,
+              "upperBound": -1.0
+            },
+            {
+              "nominalValue": -0.7,
+              "upperBound": 1.3
+            },
+            {
+              "nominalValue": -0.7,
+              "upperBound": 1.3
+            },
+            {
+              "nominalValue": -2.9,
+              "upperBound": -0.9
+            },
+            {
+              "nominalValue": -2.9,
+              "upperBound": -0.9
+            },
+            {
+              "nominalValue": -2.9,
+              "upperBound": -0.9
+            },
+            {
+              "nominalValue": -16.9,
+              "upperBound": -14.9
+            },
+            {
+              "nominalValue": -16.9,
+              "upperBound": -14.9
+            },
+            {
+              "nominalValue": -16.9,
+              "upperBound": -14.9
+            },
+            {
+              "nominalValue": -17.1,
+              "upperBound": -15.1
+            },
+            {
+              "nominalValue": -17.1,
+              "upperBound": -15.1
+            },
+            {
+              "nominalValue": -17.1,
+              "upperBound": -15.1
+            },
+            {
+              "nominalValue": -17.1,
+              "upperBound": -15.1
+            },
+            {
+              "nominalValue": -16.7,
+              "upperBound": -14.7
+            },
+            {
+              "nominalValue": -16.7,
+              "upperBound": -14.7
+            },
+            {
+              "nominalValue": -16.8,
+              "upperBound": -14.8
+            },
+            {
+              "nominalValue": -16.8,
+              "upperBound": -14.8
+            },
+            {
+              "nominalValue": -16.8,
+              "upperBound": -14.8
+            },
+            {
+              "nominalValue": -16.7,
+              "upperBound": -14.7
+            },
+            {
+              "nominalValue": 36.0,
+              "upperBound": 36.0
+            },
+            {
+              "nominalValue": 18.1,
+              "upperBound": 20.1
+            },
+            {
+              "nominalValue": -15.9,
+              "upperBound": -13.9
+            },
+            {
+              "nominalValue": -15.9,
+              "upperBound": -13.9
+            },
+            {
+              "nominalValue": -15.9,
+              "upperBound": -13.9
+            },
+            {
+              "nominalValue": -15.8,
+              "upperBound": -13.8
+            },
+            {
+              "nominalValue": -15.8,
+              "upperBound": -13.8
+            },
+            {
+              "nominalValue": -15.8,
+              "upperBound": -13.8
+            },
+            {
+              "nominalValue": 18.2,
+              "upperBound": 20.2
+            },
+            {
+              "nominalValue": 28.0,
+              "upperBound": 30.0
+            },
+            {
+              "nominalValue": 0.5,
+              "upperBound": 2.5
+            },
+            {
+              "nominalValue": 0.5,
+              "upperBound": 2.5
+            },
+            {
+              "nominalValue": 0.5,
+              "upperBound": 2.5
+            },
+            {
+              "nominalValue": 0.6,
+              "upperBound": 2.6
+            },
+            {
+              "nominalValue": 0.6,
+              "upperBound": 2.6
+            },
+            {
+              "nominalValue": 0.6,
+              "upperBound": 2.6
+            },
+            {
+              "nominalValue": 34.6,
+              "upperBound": 36.0
+            }
+          ]
+        },
+        {
+          "globalOperatingClass": 132,
+          "channelCfi": [
+            3,
+            11,
+            19,
+            27,
+            35,
+            43,
+            51,
+            59,
+            67,
+            75,
+            83,
+            91,
+            123,
+            131,
+            139,
+            147,
+            155,
+            163,
+            171,
+            179
+          ],
+          "maxEirp": [
+            {
+              "nominalValue": 2.2,
+              "upperBound": 4.2
+            },
+            {
+              "nominalValue": 0.0,
+              "upperBound": 2.0
+            },
+            {
+              "nominalValue": 0.0,
+              "upperBound": 2.0
+            },
+            {
+              "nominalValue": 2.3,
+              "upperBound": 4.3
+            },
+            {
+              "nominalValue": 0.1,
+              "upperBound": 2.1
+            },
+            {
+              "nominalValue": -13.9,
+              "upperBound": -11.9
+            },
+            {
+              "nominalValue": -13.9,
+              "upperBound": -11.9
+            },
+            {
+              "nominalValue": -14.1,
+              "upperBound": -12.1
+            },
+            {
+              "nominalValue": -14.1,
+              "upperBound": -12.1
+            },
+            {
+              "nominalValue": -13.7,
+              "upperBound": -11.7
+            },
+            {
+              "nominalValue": -13.8,
+              "upperBound": -11.8
+            },
+            {
+              "nominalValue": -13.7,
+              "upperBound": -11.7
+            },
+            {
+              "nominalValue": -12.9,
+              "upperBound": -10.9
+            },
+            {
+              "nominalValue": -12.9,
+              "upperBound": -10.9
+            },
+            {
+              "nominalValue": -12.8,
+              "upperBound": -10.8
+            },
+            {
+              "nominalValue": -12.8,
+              "upperBound": -10.8
+            },
+            {
+              "nominalValue": 3.5,
+              "upperBound": 5.5
+            },
+            {
+              "nominalValue": 3.5,
+              "upperBound": 5.5
+            },
+            {
+              "nominalValue": 3.6,
+              "upperBound": 5.6
+            },
+            {
+              "nominalValue": 3.6,
+              "upperBound": 5.6
+            }
+          ]
+        },
+        {
+          "globalOperatingClass": 133,
+          "channelCfi": [
+            7,
+            23,
+            39,
+            55,
+            71,
+            87,
+            135,
+            151,
+            167
+          ],
+          "maxEirp": [
+            {
+              "nominalValue": 3.0,
+              "upperBound": 5.0
+            },
+            {
+              "nominalValue": 3.1,
+              "upperBound": 5.1
+            },
+            {
+              "nominalValue": -10.9,
+              "upperBound": -8.9
+            },
+            {
+              "nominalValue": -11.1,
+              "upperBound": -9.1
+            },
+            {
+              "nominalValue": -11.1,
+              "upperBound": -9.1
+            },
+            {
+              "nominalValue": -10.8,
+              "upperBound": -8.8
+            },
+            {
+              "nominalValue": -9.9,
+              "upperBound": -7.9
+            },
+            {
+              "nominalValue": -9.8,
+              "upperBound": -7.8
+            },
+            {
+              "nominalValue": 6.6,
+              "upperBound": 8.6
+            }
+          ]
+        },
+        {
+          "globalOperatingClass": 134,
+          "channelCfi": [
+            15,
+            47,
+            79,
+            143
+          ],
+          "maxEirp": [
+            {
+              "nominalValue": 6.1,
+              "upperBound": 8.1
+            },
+            {
+              "nominalValue": -8.1,
+              "upperBound": -6.1
+            },
+            {
+              "nominalValue": -8.0,
+              "upperBound": -6.0
+            },
+            {
+              "nominalValue": -6.9,
+              "upperBound": -4.9
+            }
+          ]
+        },
+        {
+          "globalOperatingClass": 136,
+          "channelCfi": [
+            2
+          ],
+          "maxEirp": [
+            {
+              "nominalValue": -0.8,
+              "upperBound": 1.2
+            }
+          ]
+        }
+      ],
+      "expectedResponseCodes": [
+        0
+      ]
+    }
+  ]
+}

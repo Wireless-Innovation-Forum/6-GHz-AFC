@@ -6,5 +6,3 @@ harness/responses/*.json
 harness/auth
 !harness/auth/*.py
 !harness/auth/README.md
-# Temporarily suppress pushing response masks while test vectors are under development
-harness/masks/*.json
