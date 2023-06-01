@@ -11,7 +11,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""Available Spectrum Inquiry Response Definitions - SDI Protocol v1.3"""
+"""Available Spectrum Inquiry Response Definitions - SDI Protocol v1.4"""
 
 from dataclasses import dataclass
 from typing import Union

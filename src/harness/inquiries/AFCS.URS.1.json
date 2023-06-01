@@ -1,17 +1,14 @@
 {
-  "version": "1.3",
+  "version": "1.4",
   "availableSpectrumInquiryRequests": [
     {
       "requestId": "REQ-URS1",
       "deviceDescriptor": {
-        "serialNumber": "REG123",
+        "serialNumber": "URS1",
         "certificationId": [
           {
-            "nra": "FCC"
+            "rulesetId": "US_47_CFR_PART_15_SUBPART_E"
           }
-        ],
-        "rulesetIds": [
-          "US_47_CFR_PART_15_SUBPART_E"
         ]
       },
       "location": {

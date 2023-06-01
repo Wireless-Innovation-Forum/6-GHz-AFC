@@ -11,597 +11,798 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+"""AFC Spectrum Inquiry Request Validation - SDI Protocol v1.4
 
-"""AFC Spectrum Inquiry Request Validation - SDI Protocol v1.3
+Validation functions will attempt to exhaustively test all fields (i.e.,
+validation does not stop on the first failure, but will report all
+observed failures). Multiple failures may be reported for the same
+root cause."""
 
-Validates a text file containing a spectrum inquiry request in the WFA
-standard format. Checks:
+import math
+import itertools
+from dataclasses import dataclass, astuple, field
 
-  File is parsable as json text
-  Valid interface version
-  The existence of a readable version of all required elements
-  Each input data value is of the proper type
-  Each requestId (if more than one) is unique within the message
-
-Vendor extensions are not checked.
-
-TODO:
-  linearPolygon_is_valid
-  radialPolygon_is_valid"""
-
-import inspect
-
+import available_spectrum_inquiry_request as afc_req
 import sdi_validator_common as sdi_validate
-from interface_common import FrequencyRange
 
-DEBUG = False
+@dataclass
+class _Edge:
+  """Supporting class for edge intersection calculations"""
+  vertex1: afc_req.Point
+  vertex2: afc_req.Point
+  length: float = field(init=False) # Cache edge length to avoid extra distance calcs
+
+  def __post_init__(self):
+    # Compute edge length on initialization to reduce number of distance calcs
+    self.length = self.vertex1.distance_to(self.vertex2)
+
+  def as_cart(self):
+    """Convert a lat/lon edge object to a cartesian edge tuple"""
+    return (_CartesianPoint(*self.vertex1.as_cart()), _CartesianPoint(*self.vertex2.as_cart()))
+
+  def contains_point(self, p: afc_req.Point, eps=1e-3):
+    """Checks if an edge contains another point
+    
+    Comparison assumes that, if a point lines on the edge,
+    the distance from both vertices to the point will be
+    the same as the distance between the vertices
+    
+    Parameters:
+      p (Point): Point used for intersection check
+      eps: Allowed tolerance on equality check used to determine intersection (in meters)"""
+    arc_intersect_length = self.vertex1.distance_to(p) + self.vertex2.distance_to(p)
+    return math.fabs(self.length - arc_intersect_length) < eps
+
+  def intersects(self, other: '_Edge'):
+    """Determines if an edge intersects with another edge
+    
+    Converts edges to cartesian coordinates, determines planes defining great circles,
+    finds intersection points, and checks if intersection points are on both edges
+    
+    Parameters:
+      other (_Edge): Other edge to perform intersection check with
+      
+    Returns:
+      True if the edges intersect, false otherwise
+    """
+    # Convert arc points to cartesian
+    a1_cart = self.as_cart()
+    a2_cart = other.as_cart()
+
+    # Get plane normals from arcs
+    n1 = a1_cart[0].cross(a1_cart[1]).norm()
+    n2 = a2_cart[0].cross(a2_cart[1]).norm()
+
+    # Check for identical normals or connected edges
+    if (n1 == n2) or (self.vertex2 == other.vertex1):
+      # Handle equal arcs case
+      # Check if non-shared endpoints are on the other arc
+      for int_point, arc in zip([self.vertex1, other.vertex2], [other, self]):
+        does_intersect = arc.contains_point(int_point)
+        if does_intersect:
+          break
+
+    else:
+      # Handle intersecting arcs
+      # Find intersection points
+      i1 = n1.cross(n2).norm()
+      i2 = -i1
+
+      # Convert intersection points back to lat/lon
+      i1 = i1.to_sdi_point()
+      i2 = i2.to_sdi_point()
+
+      # Check if either intersection point exists on both arcs
+      for int_point in [i1, i2]:
+        does_intersect = True
+        for arc in [self, other]:
+          does_intersect &= arc.contains_point(int_point)
+        if does_intersect:
+          break
+
+    return does_intersect
+
+@dataclass
+class _CartesianPoint:
+  """Supporting class for cartesian point/vector operations"""
+  x: float
+  y: float
+  z: float
+
+  def cross(self, other: '_CartesianPoint'):
+    """Computes vector cross product, treating both points as 3-dimensional vectors
+    
+    Parameters:
+      other (_CartesianPoint): Vector on right-hand side of cross product
+    
+    Returns:
+      A new vector (_CartesianPoint) containing the cross product of the other two vectors
+    """
+    return _CartesianPoint(self.y*other.z - other.y*self.z,
+                           other.x*self.z - self.x*other.z,
+                           self.x*other.y - other.x*self.y)
+
+  def norm(self):
+    """Computes a version of the vector/point with magnitude/distance from origin of 1
+    
+    Parameters:
+      None
+      
+    Returns:
+      A new _CartesianPoint normalized to magnitude/distance from origin of 1
+    """
+    tmp = math.sqrt(sum(map(lambda a: a*a, astuple(self))))
+    return _CartesianPoint(*map(lambda a: a/tmp, astuple(self)))
+
+  def to_sdi_point(self):
+    """Converts a cartesian point back to a lat/lon SDI Point
+    
+    Assumes cartesian point is normalized (R=1)
+
+    Parameters:
+      None
+      
+    Returns:
+      A new SDI Point corresponding to the original cartesian point
+    """
+    lat = math.degrees(math.asin(self.z))
+    lon = math.degrees(math.atan2(self.y, self.x))
+    return afc_req.Point(lon, lat)
+
+  def __eq__(self, other):
+    return all(map(lambda a: math.fabs(a[0] - a[1]) < 1e-10, zip(astuple(self), astuple(other))))
+
+  def __neg__(self):
+    return _CartesianPoint(-self.x, -self.y, -self.z)
 
 class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
-  """Provides validation functions for AFC Inquiry-specific types"""
+  """Provides validation functions for AFC Request-specific types"""
 
-  def validate_available_spectrum_inquiry_request_message(self, request):
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
+  _enforce_strict_polygon = False # Spec wording does not require many polygon constraints
+                                  # (num of vertices, max edge length, no intersecting edges).
+                                  # When false, the validator will check these constraints and
+                                  # output log messages, but the validator result (true/false)
+                                  # will not be impacted. Set this to true for these checks to
+                                  # impact the validator result.
 
-    is_valid = True
-
-    if self.item_is_readable(request, 'version'):
-      if self.get_as_type(request['version'], str) is not None:
-        is_valid &= self.validate_version(request['version'])
-      else:
-        is_valid = False
-    else:
-      is_valid = False
-
-    if self.item_is_readable(request, 'availableSpectrumInquiryRequests'):
-      if not self.validate_available_spectrum_inquiry_requests(
-                  request['availableSpectrumInquiryRequests']):
-        is_valid = False
-
-      request_ids = []
-      for request in request['availableSpectrumInquiryRequests']:
-        # Check item as optional to prevent double logging error
-        # (already logged by validate_requests)
-        if self.item_is_readable(request, 'requestId', item_is_required=False):
-          request_ids.append(request['requestId'])
-      if len(request_ids) != len(list(set(request_ids))):
-        is_valid = False
-        self._warning('Request message contains duplicate requestIDs. '
-                     f'All requestIDs: {request_ids}')
-    else:
-      is_valid = False
-
-    return is_valid
-
-  def validate_available_spectrum_inquiry_requests(self, request):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
+  def _validate_polygon_vertex_separation(self, outerBoundary: list[afc_req.Point]):
+    """Breakout of max vertex separation check"""
+    margin = 25000                     # Spec says 130km, but we allow an extra 25km to account
+    allowed_distance = 130000 + margin # for differences in distance calculation methods
 
     is_valid = True
 
-    number_of_requests = 0
-
-    for availableSpectrumInquiryRequest in request:
-
-      number_of_requests += 1
-      if self.item_is_readable(availableSpectrumInquiryRequest, 'requestId'):
-        if not self.validate_request_id(availableSpectrumInquiryRequest['requestId']):
-          is_valid = False
-      else:
-        is_valid = False
-
-      if self.item_is_readable(availableSpectrumInquiryRequest, 'deviceDescriptor'):
-        if not self.validate_device_descriptor(availableSpectrumInquiryRequest['deviceDescriptor']):
-          is_valid = False
-      else:
-        is_valid = False
-
-      if self.item_is_readable(availableSpectrumInquiryRequest, 'location'):
-        if not self.validate_location(availableSpectrumInquiryRequest['location']):
-          is_valid = False
-      else:
-        is_valid = False
-
-      valid_inquiry_present = False
-      if self.item_is_readable(availableSpectrumInquiryRequest,
-                          'inquiredFrequencyRange', item_is_required = False):
-        if len(availableSpectrumInquiryRequest['inquiredFrequencyRange']) > 0:
-          valid_inquiry_present = True
-        if not self.validate_inquired_frequency_range(availableSpectrumInquiryRequest['inquiredFrequencyRange']):
-          is_valid = False
-
-      if self.item_is_readable(availableSpectrumInquiryRequest,
-                          'inquiredChannels', item_is_required=False):
-        if len(availableSpectrumInquiryRequest['inquiredChannels']) > 0:
-          valid_inquiry_present = True
-        if not self.validate_inquired_channels(availableSpectrumInquiryRequest['inquiredChannels']):
-          is_valid = False
-
-      if not valid_inquiry_present:
-        log_message = 'Neither frequency- nor channel-based inquiry is present'
-        self._warning(log_message)
-        is_valid = False
-
-      if self.item_is_readable(availableSpectrumInquiryRequest, 'minDesiredPower',
-                          item_is_required = False):
-        if type(availableSpectrumInquiryRequest['minDesiredPower']) not in [int, float]:
-          is_valid = False
-
-    return is_valid
-
-  def validate_certification_id(self, certificationId):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    allowed_nras = ['FCC']
-
-    is_valid = True
-
-    if not self.item_is_readable(certificationId, 'nra'):
-      is_valid = False
-    else:
-      if not self.type_is_correct(certificationId['nra'], 'nra', 'str'):
-        is_valid = False
-      else:
-        if certificationId['nra'] not in allowed_nras:
-          is_valid = False
-    if not self.item_is_readable(certificationId, 'id'):
-      is_valid = False
-    else:
-      if not self.type_is_correct(certificationId['id'], 'id', 'str'):
-        is_valid = False
-
-    return is_valid
-
-  def validate_certification_ids(self, certificationIds):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    is_valid = True
-
-    if not self.type_is_correct(certificationIds, 'certificationId', 'list'):
-      is_valid = False
-    else:
-      for certificationId in certificationIds:
-        if not self.validate_certification_id(certificationId):
-          is_valid = False
-
-    return is_valid
-
-  def validate_channels(self, channels):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    is_valid = True
-
-    if self.item_is_readable(channels, 'globalOperatingClass'):
-      if type(channels['globalOperatingClass']) not in [int, float]:
-        is_valid = False
-    else:
-      is_valid = False
-
-    if self.item_is_readable(channels, 'channelCfi', item_is_required = False):
-      if self.type_is_correct(channels['channelCfi'], 'channelCfi', 'list'):
-        for channelCfi in channels['channelCfi']:
-          if type(channelCfi) not in [int, float]:
-            is_valid = False
-      else:
-        is_valid = False
-
-    return is_valid
-
-  def validate_device_descriptor(self, deviceDescriptor):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    is_valid = True
-
-    if self.item_is_readable(deviceDescriptor, 'serialNumber'):
-      if not self.validate_serial_number(deviceDescriptor['serialNumber']):
-        is_valid = False
-    else:
-      is_valid = False
-
-    if self.item_is_readable(deviceDescriptor, 'certificationId'):
-      if not self.validate_certification_ids(deviceDescriptor['certificationId']):
-        is_valid = False
-    else:
-      is_valid = False
-
-    if self.item_is_readable(deviceDescriptor, 'rulesetIds'):
-      if not self.validate_ruleset_ids(deviceDescriptor['rulesetIds']):
-        is_valid = False
-    else:
-      is_valid = False
-
-    return is_valid
-
-  def validate_elevation(self, elevation):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    is_valid = True
-
-    allowed_heightTypes = ['AGL', 'AMSL']
-
-    if self.item_is_readable(elevation, 'height'):
-      if not self.type_is_correct(elevation['height'], 'height', 'number'):
-        is_valid = False
-    else:
-      is_valid = False
-
-    if self.item_is_readable(elevation, 'heightType'):
-      if self.type_is_correct(elevation['heightType'], 'heightType', 'str'):
-        if elevation['heightType'] not in allowed_heightTypes:
-          log_message = 'Invalid heightType: ' + str(elevation['heightType'])
-          self._warning(log_message)
-          is_valid = False
-      else:
-        is_valid = False
-    else:
-      is_valid = False
-
-    if self.item_is_readable(elevation, 'verticalUncertainty'):
-      if not self.type_is_correct(elevation['verticalUncertainty'], 'verticalUncertainty', 'int'):
-        is_valid = False
-    else:
-      is_valid = False
-
-    return is_valid
-
-  def validate_ellipse(self, ellipse):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    is_valid = True
-
-    if not self.item_is_readable(ellipse, 'center') or not self.validate_point(ellipse['center']):
-      is_valid = False
-
-    if self.item_is_readable(ellipse, 'majorAxis'):
-      if not self.type_is_correct(ellipse['majorAxis'], 'majorAxis', 'int'):
-        is_valid = False
-      elif ellipse['majorAxis'] < 0:
-        log_message = 'majorAxis must be a positive integer: ' + \
-                      str(ellipse['majorAxis'])
-        self._warning(log_message)
-        is_valid = False
-    else:
-      is_valid = False
-
-    if self.item_is_readable(ellipse, 'minorAxis'):
-      if not self.type_is_correct(ellipse['minorAxis'], 'minorAxis', 'int'):
-        is_valid = False
-      elif ellipse['minorAxis'] < 0:
-        log_message = 'minorAxis must be a positive integer: ' + \
-                      str(ellipse['minorAxis'])
-        self._warning(log_message)
-        is_valid = False
-    else:
-      is_valid = False
-
-    if self.item_is_readable(ellipse, 'orientation'):
-      if not self.type_is_correct(ellipse['orientation'], 'orientation', 'number'):
-        is_valid = False
-      elif ellipse['orientation'] < 0 or ellipse['orientation'] > 180:
-        log_message = 'orientation value is outside of 0-180: ' + \
-                      str(ellipse['orientation'])
-        self._warning(log_message)
-    else:
-      is_valid = False
-
-    return is_valid
-
-  def validate_inquired_channels(self, inquiredChannels):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    is_valid = True
-
-    if self.type_is_correct(inquiredChannels, 'inquiredChannels', 'list'):
-      for channels in inquiredChannels:
-        if not self.validate_channels(channels):
-          is_valid = False
-      if len(inquiredChannels) == 0:
-        log_message = 'inquiredChannels is present but array is empty'
-        self._warning(log_message)
-        is_valid = False
-    else:
-      is_valid = False
-
-    return is_valid
-
-  def validate_inquired_frequency_range(self, inquiredFrequencyRange):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    is_valid = True
-
-    if self.type_is_correct(inquiredFrequencyRange, 'inquiredFrequencyRange', 'list'):
-      for frequencyRange in inquiredFrequencyRange:
-        # Temporary patch to use sdi_validator_common implementation of validate_frequency_range
-        if all(self.item_is_readable(frequencyRange, val)
-               for val in ['lowFrequency', 'highFrequency']):
-          if not self.validate_frequency_range(FrequencyRange(**frequencyRange)):
-            is_valid = False
-        else:
-          is_valid = False
-      if len(inquiredFrequencyRange) == 0:
-        log_message = 'inquiredFrequencyRange is present but array is empty'
-        self._warning(log_message)
-        is_valid = False
-    else:
-      is_valid = False
-
-    return is_valid
-
-
-  def item_is_readable(self, request, item, item_is_required=True):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    is_valid = True
-
+    # Get number of points to iterate over (wrap in try to gracefully handle non-iterable datatype)
     try:
-      temp = request[item]
-    except:
-      if item_is_required:
-        log_message = item + ' is missing or otherwise unreadable'
-        self._warning(log_message)
+      num_pts = len(outerBoundary)
+    except TypeError as ex:
+      self._warning(f'Exception encountered iterating over points in boundary: {ex}')
       return False
 
-    return is_valid
-
-
-  def validate_linear_polygon(self, linearPolygon):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    # TODO: Write this
-    is_valid = True
-    self._warning('Validation of request linearPolygon not yet implemented, presumed valid')
-
-    return is_valid
-
-
-  def validate_location(self, location):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    is_valid = True
-
-    # Exactly one of ellipse, linearPolygon, or radialPolygon must be present
-    # and valid
-    num_location_types = 0
-
-    if self.item_is_readable(location, 'ellipse', item_is_required=False):
-      num_location_types += 1
-      if not self.validate_ellipse(location['ellipse']):
-        is_valid = False
-
-    if self.item_is_readable(location, 'linearPolygon', item_is_required=False):
-      num_location_types += 1
-      if not self.validate_linear_polygon(location['linearPolygon']):
-        is_valid = False
-
-    if self.item_is_readable(location, 'radialPolygon', item_is_required=False):
-      num_location_types += 1
-      if not self.validate_radial_polygon(location['radialPolygon']):
-        is_valid = False
-
-    if num_location_types != 1:
-      log_message = 'The number of location descriptions must be equal to 1. '
-      log_message += 'Number found: ' + str(num_location_types)
-      self._warning(log_message)
-      is_valid = False
-
-    if self.item_is_readable(location, 'elevation'):
-      if not self.validate_elevation(location['elevation']):
-        is_valid = False
-        self._warning(f'Elevation field is not valid: {location["elevation"]}')
-    else:
-      is_valid = False
-
-    allowed_indoorDeployments = [0, 1, 2]
-    if self.item_is_readable(location, 'indoorDeployment', item_is_required=False):
-      if self.type_is_correct(location['indoorDeployment'], 'indoorDeployment', 'int'):
-        if location['indoorDeployment'] not in allowed_indoorDeployments:
+    # Check all consecutive vertex pairs, starting with last to first
+    for point_idx in range(-1, num_pts-1):
+      try:
+        if outerBoundary[point_idx].distance_to(outerBoundary[point_idx+1]) > allowed_distance:
           is_valid = False
-      else:
+          self._warning('Distance between polygon endpoints with coordinates '
+                        f'(lat: {outerBoundary[point_idx].latitude}, '
+                        f'long: {outerBoundary[point_idx].longitude}) and '
+                        f'(lat: {outerBoundary[point_idx+1].latitude}, '
+                        f'long: {outerBoundary[point_idx+1].longitude}) exceeds the expected '
+                        f'separation distance of {allowed_distance - margin})')
+      except (TypeError, AttributeError) as ex:
         is_valid = False
-
+        self._warning('Exception encountered getting distance between points '
+                     f'({outerBoundary[point_idx]}, {outerBoundary[point_idx+1]}): {ex}')
     return is_valid
 
-  def validate_point(self, point):
+  def _validate_polygon_edge_intersection(self, outerBoundary: list[afc_req.Point]):
+    """Breakout of polygon edge intersection check"""
 
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    is_valid = True
-
-    if self.item_is_readable(point, 'longitude'):
-      if not self.type_is_correct(point['longitude'], 'longitude', 'number'):
-        is_valid = False
-      elif point['longitude'] < -180 or point['longitude'] > 180:
-        log_message = 'longitude is outside of -180..180: ' + \
-                      str(point['longitude'])
-        self._warning(log_message)
-        is_valid = False
-    else:
-      is_valid = False
-
-    if self.item_is_readable(point, 'latitude'):
-      if not self.type_is_correct(point['latitude'], 'latitude', 'number'):
-        is_valid = False
-      elif point['latitude'] < -90 or point['latitude'] > 90:
-        log_message = 'latitude is outside of -90..90: ' + \
-                      str(point['latitude'])
-        self._warning(log_message)
-        is_valid = False
-    else:
-      is_valid = False
-
-    return is_valid
-
-
-  def validate_radial_polygon(self, radialPolygon):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    # TODO: Write this
-    is_valid = True
-    self._warning('Validation of request radialPolygon not yet implemented, presumed valid')
-
-    return is_valid
-
-
-  def validate_request_id(self, requestId):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    if not self.type_is_correct(requestId, 'requestId', 'str'):
+    # Define polygon edges from point pairs
+    try:
+      num_pts = len(outerBoundary)
+      edges = []
+      for point_idx in range(-1, num_pts-1):
+        edges.append(_Edge(outerBoundary[point_idx], outerBoundary[point_idx+1]))
+    except (TypeError, AttributeError) as ex:
+      self._warning(f'Exception encountered iterating over points in boundary: {ex}')
       return False
-    else:
-      return True
 
+    # Check intersections with every pair of edges
+    is_valid = True
+    for edge_pair in itertools.combinations(edges, 2):
+      if edge_pair[0] == edges[0] and edge_pair[1] == edges[-1]:
+        edge_pair = edge_pair[1], edge_pair[0]
+      if edge_pair[0].intersects(edge_pair[1]):
+        self._warning('Found intersection between polygon edges with linear points '
+                     f'({edge_pair[0]}) and ({edge_pair[1]})')
+        is_valid = False
 
-  def validate_ruleset_ids(self, rulesetIds):
+    return is_valid
 
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
+  @sdi_validate.common_sdi_validator
+  def validate_channels(self, channels: afc_req.Channels):
+    """Validates that an Channels object satisfies the SDI spec
+
+    Checks:
+      globalOperatingClass must be a valid, finite number
+      All values for channelCfi must be valid, finite numbers, if present
+
+    Parameters:
+      channels (Channels): Channels to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+    is_valid = True
+
+    # globalOperatingClass must be a valid, finite number
+    try:
+      if not math.isfinite(channels.globalOperatingClass):
+        raise TypeError()
+    except TypeError:
+      is_valid = False
+      self._warning(f'globalOperatingClass ({channels.globalOperatingClass}) '
+                     'must be a finite numeric value')
+
+    # All values for channelCfi must be valid, finite numbers, if present
+    if channels.channelCfi is not None:
+      try:
+        if not all(math.isfinite(channel_cfi) for channel_cfi in channels.channelCfi):
+          raise TypeError()
+      except TypeError:
+        is_valid = False
+        self._warning(f'channelCfi ({channels.channelCfi}) must be a list of finite numeric values')
+    return is_valid
+
+  @sdi_validate.common_sdi_validator
+  def validate_point(self, point: afc_req.Point):
+    """Validates that a Point object satisfies the SDI spec
+
+    Checks:
+      longitude is a valid number in the range [-180, 180]
+      latitude is valid number in the range [-90, 90]
+
+    Parameters:
+      point (Point): Point to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+    is_valid = True
+
+    # latitude is a valid number in the range [-90, 90]
+    try:
+      if not (-90 <= point.latitude <= 90):
+        raise TypeError()
+    except TypeError:
+      is_valid = False
+      self._warning(f'Latitude {point.latitude} must be a valid number in the range [-90, 90]')
+
+    # longitude is a valid number in the range [-180, 180]
+    try:
+      if not (-180 <= point.longitude <= 180):
+        raise TypeError()
+    except TypeError:
+      is_valid = False
+      self._warning(f'Longitude {point.longitude} must be a valid number in the range [-180, 180]')
+    return is_valid
+
+  @sdi_validate.common_sdi_validator
+  def validate_vector(self, vector: afc_req.Vector):
+    """Validates that an Vector object satisfies the SDI spec
+
+    Checks:
+      length is a valid, finite number
+      angle is a valid number in the range [0, 360]
+
+    Parameters:
+      vector (Vector): Vector to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+    is_valid = True
+
+    # length is a valid, finite number
+    try:
+      if not math.isfinite(vector.length):
+        raise TypeError()
+    except TypeError:
+      is_valid = False
+      self._warning(f'Length ({vector.length}) must be a single finite numeric value')
+
+    # angle is a valid number in the range [-90, 90]
+    try:
+      if not (0 <= vector.angle <= 360):
+        raise TypeError()
+    except TypeError:
+      is_valid = False
+      self._warning(f'Angle ({vector.angle}) must be a valid number in the range [0, 360]')
+    return is_valid
+
+  @sdi_validate.common_sdi_validator
+  def validate_elevation(self, elev: afc_req.Elevation):
+    """Validates that an Elevation object satisfies the SDI spec
+
+    Checks:
+      height is a valid, finite number
+      heightType is a supported value
+      verticalUncertainty is a valid, positive integer
+
+    Parameters:
+      elev (Elevation): Elevation to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+    is_valid = True
+
+    # height is a valid, finite number
+    try:
+      if not math.isfinite(elev.height):
+        raise TypeError()
+    except TypeError:
+      is_valid = False
+      self._warning(f'Height ({elev.height}) must be a single finite numeric value')
+
+    # heightType is a supported value
+    supported_height_types = ['AGL', 'AMSL']
+    if elev.heightType not in supported_height_types:
+      is_valid = False
+      self._warning(f'HeightType ({elev.heightType}) must be one of: {supported_height_types}')
+
+    # verticalUncertainty is a valid, positive, finite integer
+    try:
+      if not (0 <= elev.verticalUncertainty):
+        raise TypeError()
+    except TypeError:
+      is_valid = False
+      self._warning(f'VerticalUncertainty ({elev.verticalUncertainty}) must be a valid, positive '
+                     'integer')
+
+    return is_valid
+
+  @sdi_validate.common_sdi_validator
+  def validate_radial_polygon(self, poly: afc_req.RadialPolygon):
+    """Validates that a RadialPolygon object satisfies the SDI spec
+
+    Checks:
+      center is valid
+      All outerBoundary Vectors are valid
+    
+    Warns (but does not require, unless _enforce_strict_polygon is enabled):
+      At least 3 and no more than 15 unique vertices define the polygon
+      Connecting lines between successive vertices may not cross any other connecting lines
+        between successive vertices (requires Geopy)
+      Distance between successive vertices should not exceed 130km (requires Geopy)
+
+    Parameters:
+      poly (RadialPolygon): RadialPolygon to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+
+    # center is valid
+    is_valid = self.validate_point(poly.center)
+
+    # All outerBoundary points are valid
+    try:
+      is_valid &= all([self.validate_vector(x) for x in poly.outerBoundary])
+    except (TypeError, AttributeError) as ex:
+      is_valid = False
+      self._warning(f'Exception encountered validating radial polygon vectors: {ex}')
+
+    # At least 3 and no more than 15 vertices define the polygon
+    try:
+      if not (3 <= len(poly.outerBoundary) <= 15):
+        is_valid &= not self._enforce_strict_polygon
+        self._warning(f'Radial polygon should contain between 3 and 15 vertices: {poly}')
+    except (TypeError, AttributeError) as ex:
+      is_valid = False
+      self._warning(f'Exception encountered validating number of radial polygon vertices: {ex}')
+
+    # All vertices are unique
+    try:
+      if len(poly.outerBoundary) != len(list(set([astuple(x) for x in poly.outerBoundary]))):
+        is_valid &= not self._enforce_strict_polygon
+        self._warning(f'Radial polygon contains non-unique vertices: {poly}')
+    except TypeError as ex:
+      is_valid = False
+      self._warning(f'Could not identify unique vertices in radial polygon ({poly}): {ex}')
+
+    try: # Geopy dependent tests
+      lin_poly = afc_req.LinearPolygon.from_radial(poly) # Get a temp linear polygon version
+
+      # Distance between successive vertices should not exceed 130km
+      if not self._validate_polygon_vertex_separation(lin_poly.outerBoundary):
+        is_valid &= not self._enforce_strict_polygon
+
+      # Connecting lines between successive vertices may not cross any other connecting lines
+      # between successive vertices
+      if not self._validate_polygon_edge_intersection(lin_poly.outerBoundary):
+        is_valid &= not self._enforce_strict_polygon
+    except ImportError:
+      self._warning('Package "geopy" not available; distance and edge intersection validations '
+                    'skipped')
+    except (TypeError, AttributeError) as ex:
+      is_valid = False
+      self._warning(f'Exception encountered when converting radial to linear polygon: {ex}')
+
+    return is_valid
+
+  @sdi_validate.common_sdi_validator
+  def validate_linear_polygon(self, poly: afc_req.LinearPolygon):
+    """Validates that a LinearPolygon object satisfies the SDI spec
+
+    Checks:
+      All outerBoundary Points are valid
+    
+    Warns (but does not require, unless _enforce_strict_polygon is enabled):
+      At least 3 and no more than 15 unique vertices define the polygon
+      Connecting lines between successive vertices may not cross any other connecting lines
+        between successive vertices (requires Geopy)
+      Distance between successive vertices should not exceed 130km
+
+    Parameters:
+      poly (LinearPolygon): LinearPolygon to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
 
     is_valid = True
 
-    valid_rulesetIds = ['US_47_CFR_PART_15_SUBPART_E']
+    # All outerBoundary points are valid
+    try:
+      is_valid &= all([self.validate_point(x) for x in poly.outerBoundary])
+    except (TypeError, AttributeError) as ex:
+      is_valid = False
+      self._warning(f'Exception encountered validating linear polygon points: {ex}')
 
-    if self.type_is_correct(rulesetIds, 'rulesetIds', 'list'):
-      for rulesetId in rulesetIds:
-        if rulesetId not in valid_rulesetIds:
-          log_message = 'Invalid rulesetId: ' + str(rulesetId)
-          self._warning(log_message)
+    # At least 3 and no more than 15 vertices define the polygon
+    try:
+      if not (3 <= len(poly.outerBoundary) <= 15):
+        is_valid &= not self._enforce_strict_polygon
+        self._warning(f'Linear polygon should contain between 3 and 15 vertices: {poly}')
+    except (TypeError, AttributeError) as ex:
+      is_valid = False
+      self._warning(f'Exception encountered validating number of linear polygon vertices: {ex}')
+
+    # All vertices are unique
+    try:
+      if len(poly.outerBoundary) != len(list(set([astuple(x) for x in poly.outerBoundary]))):
+        is_valid &= not self._enforce_strict_polygon
+        self._warning(f'Linear polygon contains non-unique vertices: {poly}')
+    except TypeError as ex:
+      is_valid = False
+      self._warning(f'Could not identify unique vertices in linear polygon ({poly}): {ex}')
+
+    try: # Geopy dependent tests
+      # Distance between successive vertices should not exceed 130km
+      if not self._validate_polygon_vertex_separation(poly.outerBoundary):
+        is_valid &= not self._enforce_strict_polygon
+
+      # Connecting lines between successive vertices may not cross any other connecting lines
+      # between successive vertices
+      if not self._validate_polygon_edge_intersection(poly.outerBoundary):
+        is_valid &= not self._enforce_strict_polygon
+    except ImportError:
+      self._warning('Package "geopy" not available; distance and edge intersection validation '
+                    'skipped')
+
+    return is_valid
+
+  @sdi_validate.common_sdi_validator
+  def validate_ellipse(self, ellipse: afc_req.Ellipse):
+    """Validates that an Ellipse object satisfies the SDI spec
+
+    Checks:
+      center is a valid Point
+      majorAxis, minorAxis are valid, positive integer
+      majorAxis is greater than or equal to minorAxis
+      orientation is a valid number in the range [0, 180]
+
+    Parameters:
+      ellipse (Ellipse): Ellipse to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+
+    # center is a valid point
+    is_valid = self.validate_point(ellipse.center)
+
+    # majorAxis is a valid, positive integer
+    try:
+      if not (0 <= ellipse.majorAxis):
+        raise TypeError()
+    except TypeError:
+      is_valid = False
+      self._warning(f'Major axis ({ellipse.majorAxis}) must be a valid positive integer')
+
+    # minorAxis is a valid, positive integer
+    try:
+      if not (0 <= ellipse.minorAxis):
+        raise TypeError()
+    except TypeError:
+      is_valid = False
+      self._warning(f'Minor axis ({ellipse.minorAxis}) must be a valid positive integer')
+
+    # majorAxis is greater than or equal to minorAxis
+    try:
+      if not (ellipse.majorAxis >= ellipse.minorAxis):
+        is_valid = False
+        self._warning(f'Ellipse major axis ({ellipse.majorAxis}) should not be less than '
+                      f'minor axis ({ellipse.minorAxis})')
+    except TypeError as ex:
+      is_valid = False
+      self._warning(f'Could not compare ellipse major and minor axis: {ex}')
+
+    # orientation is a valid number in the range [0, 180]
+    try:
+      if not (0 <= ellipse.orientation <= 180):
+        raise TypeError()
+    except TypeError:
+      is_valid = False
+      self._warning(f'Orientation ({ellipse.orientation}) must be a valid number in the '
+                     'range [0, 180]')
+    return is_valid
+
+  @sdi_validate.common_sdi_validator
+  def validate_location(self, loc: afc_req.Location):
+    """Validates that a Location object satisfies the SDI spec
+
+    Checks:
+      elevation is valid
+      Location outline objects are valid (ellipse, linearPolygon, radialPolygon)
+      One and only one of {ellipse, linearPolygon, radialPolygon} is provided
+      indoorDeployment is a valid value (0, 1, 2), if present
+
+    Parameters:
+      loc (Location): Location to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+
+    # elevation is valid
+    is_valid = self.validate_elevation(loc.elevation)
+
+    # ellipse is valid, if present
+    if loc.ellipse is not None:
+      is_valid &= self.validate_ellipse(loc.ellipse)
+
+    # linearPolygon is valid, if present
+    if loc.linearPolygon is not None:
+      is_valid &= self.validate_linear_polygon(loc.linearPolygon)
+
+    # radialPolygon is valid, if present
+    if loc.radialPolygon is not None:
+      is_valid &= self.validate_radial_polygon(loc.radialPolygon)
+
+    # One and only one of {ellipse, linearPolygon, radialPolygon} is provided
+    exclusive_required_fields = ['ellipse', 'linearPolygon', 'radialPolygon']
+    present_flags = []
+    for cur_field in exclusive_required_fields:
+      present_flags.append(1 if getattr(loc, cur_field) is not None else 0)
+
+    match sum(present_flags):
+      case 0:
+        is_valid = False
+        self._warning('Location must include at least one of these fields: '
+                     f'{exclusive_required_fields}')
+      case 1:
+        pass
+      case _:
+        is_valid = False
+        present_fields = [field for field, present in zip(exclusive_required_fields,
+                                                          present_flags) if present]
+        self._warning(f'Location includes values for all of {present_fields} but only one is '
+                       'permitted')
+
+    # indoorDeployment is a valid value (0, 1, 2)
+    if loc.indoorDeployment is not None:
+      valid_deployments = [0, 1, 2]
+      if not any(loc.indoorDeployment == valid for valid in valid_deployments):
+        is_valid = False
+        self._warning(f'Indoor deployment value ({loc.indoorDeployment}) is not valid '
+                      f'(one of {valid_deployments})')
+    return is_valid
+
+  @sdi_validate.common_sdi_validator
+  def validate_certification_id(self, cert_id: afc_req.CertificationId):
+    """Validates that a CertificationId object satisfies the SDI spec
+
+    Checks:
+      None
+    
+    Warns (but does not require):
+      rulesetId is an acceptable value
+
+    Parameters:
+      cert_id (CertificationId): CertificationId to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+    is_valid = True
+    # rulesetId is an acceptable value
+    acceptable_values = ['US_47_CFR_PART_15_SUBPART_E', 'CA_RES_DBS-06']
+    if cert_id.rulesetId not in acceptable_values:
+      self._warning(f'Ruleset ID ({cert_id.rulesetId}) not one of the SDI accepted values: '
+                    f'{acceptable_values}')
+    return is_valid
+
+  @sdi_validate.common_sdi_validator
+  def validate_device_descriptor(self, dev: afc_req.DeviceDescriptor):
+    """Validates that a DeviceDescriptor object satisfies the SDI spec
+
+    Checks:
+      Contains at least one CertificationId
+      All CertificationIds are valid
+
+    Parameters:
+      dev (DeviceDescriptor): DeviceDescriptor to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+    is_valid = True
+    try:
+      # certificationId contains at least one value
+      if len(dev.certificationId) < 1:
+        is_valid = False
+        self._warning('Device descriptor must have at least one CertificationID')
+      else:
+        # All CertificationIds are valid
+        is_valid &= all([self.validate_certification_id(x) for x in dev.certificationId])
+    except (TypeError, AttributeError) as ex:
+      is_valid = False
+      self._warning(f'Exception caught validating CertificationIds: {ex}')
+    return is_valid
+
+  @sdi_validate.common_sdi_validator
+  def validate_available_spectrum_inquiry_request(self,
+        req: afc_req.AvailableSpectrumInquiryRequest):
+    """Validates that an AvailableSpectrumInquiryRequest object satisfies the SDI spec
+
+    Checks:
+      deviceDescriptor is valid
+      location is valid
+      At least one availability type is requested
+      Provided availability requests are not empty
+      inquiredFrequencyRange is valid, if present
+      inquiredChannels is valid, if present
+      minDesiredPower is only present for channel inquiry
+      minDesiredPower is a valid number
+      vendorExtensions are valid
+
+    Parameters:
+      req (AvailableSpectrumInquiryRequest): AvailableSpectrumInquiryRequest to be validated
+
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+    # deviceDescriptor is valid
+    is_valid = self.validate_device_descriptor(req.deviceDescriptor)
+
+    # location is valid
+    is_valid &= self.validate_location(req.location)
+
+    # At least one availability type is requested
+    if (req.inquiredFrequencyRange is None) and (req.inquiredChannels is None):
+      is_valid = False
+      self._warning('At least one of inquiredFrequencyRange or inquiredChannels must be present')
+
+    # inquiredFrequencyRange is valid, if present
+    if req.inquiredFrequencyRange is not None:
+      try:
+        if len(req.inquiredFrequencyRange) < 1:
           is_valid = False
-    else:
-      is_valid = False
+          self._warning('Inquired frequency range should not be empty')
+        else:
+          is_valid &= all(self.validate_frequency_range(x) for x in req.inquiredFrequencyRange)
+      except (AttributeError, TypeError) as ex:
+        self._warning(f'Exception caught validating frequency range: {ex}')
+        is_valid = False
 
+    # inquiredChannels is valid, if present
+    if req.inquiredChannels is not None:
+      try:
+        if len(req.inquiredChannels) < 1:
+          is_valid = False
+          self._warning('Inquired channels should not be empty')
+        else:
+          is_valid &= all([self.validate_channels(x) for x in req.inquiredChannels])
+      except (AttributeError, TypeError) as ex:
+        self._warning(f'Exception caught validating channels: {ex}')
+        is_valid = False
+
+    # minDesiredPower is only present for channel inquiry
+    if req.minDesiredPower is not None:
+      if req.inquiredChannels is None:
+        is_valid = False
+        self._warning('minDesiredPower is specified, but channel inquiry is not present')
+
+      # minDesiredPower is a valid, finite number
+      try:
+        if math.isnan(req.minDesiredPower):
+          raise TypeError()
+      except TypeError:
+        is_valid = False
+        self._warning(f'minDesiredPower ({req.minDesiredPower}) must be a single valid number')
+
+    # Vendor extensions are valid
+    is_valid &= self.validate_vendor_extension_list(req.vendorExtensions)
     return is_valid
 
+  @sdi_validate.common_sdi_validator
+  def validate_available_spectrum_inquiry_request_message(self,
+        msg: afc_req.AvailableSpectrumInquiryRequestMessage):
+    """Validates that an AvailableSpectrumInquiryRequestMessage object satisfies the SDI spec
 
-  def validate_serial_number(self, serialNumber):
+    Checks:
+      version string is valid
+      AvailableSpectrumInquiryRequests exist and are all valid
+      Each AvailableSpectrumInquiryRequest has a unique requestId
+      vendorExtensions are valid
 
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
+    Parameters:
+      msg (AvailableSpectrumInquiryRequestMessage): Message to be validated
 
-    if not self.type_is_correct(serialNumber, 'serialNumber', 'str'):
-      return False
-    else:
-      return True
-
-
-  def type_is_correct(self, variable, variable_name, expected_type):
-
-    if DEBUG:
-      print(inspect.currentframe().f_code.co_name)
-
-    if expected_type == 'str':
-      if type(variable) != str:
-        log_message = variable_name + ' is not of type string: ' \
-                      + str(variable)
-        self._warning(log_message)
-        return False
+    Returns:
+      True if all checks are satisfied
+      False otherwise"""
+    is_valid = self.validate_version(msg.version)
+    try:
+      if len(msg.availableSpectrumInquiryRequests) < 1:
+        is_valid = False
+        self._warning(f'Length of availableSpectrumInquiryRequests '
+                      f'list must be at least 1: {msg.availableSpectrumInquiryRequests}')
       else:
-        return True
-    elif expected_type == 'int':
-      if type(variable) != int:
-        log_message = variable_name + ' is not of type int: ' \
-                      + str(variable)
-        self._warning(log_message)
-        return False
-      else:
-        return True
-    elif expected_type == 'float':
-      if type(variable) != float:
-        log_message = variable_name + ' is not of type float: ' \
-                      + str(variable)
-        self._warning(log_message)
-        return False
-      else:
-        return True
-    elif expected_type == 'number':
-      if type(variable) not in [int, float]:
-        log_message = variable_name + ' is not of type number (float or int): ' \
-                      + str(variable)
-        self._warning(log_message)
-        return False
-      else:
-        return True
-    elif expected_type == 'list':
-      if type(variable) != list:
-        log_message = variable_name + ' is not of type list: ' \
-                      + str(variable)
-        self._warning(log_message)
-        return False
-      else:
-        return True
-    else:
-      self._fatal(f'Requested type {expected_type} not supported by '
-                   'request_validator.type_is_correct')
-      raise ValueError(f'Requested type {expected_type} not supported by '
-                        'request_validator.type_is_correct')
+        # availableSpectrumInquiryRequests exist and are all valid
+        is_valid &= all([self.validate_available_spectrum_inquiry_request(x)
+                        for x in msg.availableSpectrumInquiryRequests])
+
+        # Each availableSpectrumInquiryRequest has a unique requestID
+        resp_ids = [sub_resp.requestId for sub_resp in msg.availableSpectrumInquiryRequests]
+        # [list(set(list_val)) gives all unique values in list]
+        if len(resp_ids) != len(list(set(resp_ids))):
+          is_valid = False
+          self._warning('Message should have no more than one occurrence of any given requestId')
+    except (TypeError, AttributeError) as ex:
+      is_valid = False
+      self._warning(f'Exception caught validating responses: {ex}')
+
+    # vendorExtensions are valid
+    is_valid &= self.validate_vendor_extension_list(msg.vendorExtensions)
+    return is_valid
 
 def main():
-
-  # Setup logger
+  """Demonstrates use of the validator functions"""
   logging.basicConfig()
   logger = logging.getLogger()
-  logger.setLevel(logging.INFO)
 
   validator = InquiryRequestValidator(logger=logger)
 
-  in_file = 'request_sample.json'
-  log_file = in_file + '_log.txt'
+  with open('src/harness/request_sample.json', encoding="UTF-8") as sample_file:
+    sample_json = json.load(sample_file)
+    sample_conv = afc_req.AvailableSpectrumInquiryRequestMessage(**sample_json)
+    print('Example request is valid: '
+         f'{validator.validate_available_spectrum_inquiry_request_message(sample_conv)}')
+    print('Can validate sub-fields with JSON dict directly: '
+         f'{validator.validate_available_spectrum_inquiry_request(sample_json["availableSpectrumInquiryRequests"][0])}')
+    print('Can validate root message with JSON dict directly: '
+         f'{validator.validate_available_spectrum_inquiry_request_message(sample_json)}')
+    sample_conv.availableSpectrumInquiryRequests = []
+    empty_list_is_valid = validator.validate_available_spectrum_inquiry_request_message(sample_conv)
+    print('^Errors logged to console by default logger config^')
+    print(f'Empty response list is not valid: {not empty_list_is_valid}')
 
-  logger.addHandler(logging.FileHandler(log_file, mode='w', encoding='utf-8'))
-
-  is_valid = True
-
-  if not os.path.exists(in_file):
-    log_message = 'File does not exist: ' + in_file
-    logger.fatal(log_message)
-    is_valid = False
-
-  with open(in_file, encoding='utf-8') as f:
-    try:
-      request = json.load(f)
-    except:
-      log_message = 'File not parsable as JSON: ' + in_file
-      logger.error(log_message)
-      is_valid = False
-
-  if is_valid:
-    if validator.validate_available_spectrum_inquiry_request_message(request):
-      log_message = 'No errors found in ' + in_file
-      logger.info(log_message)
-    else:
-      logger.error('*** Errors found ***\nPlease see log file: ' + log_file)
-  else:
-    logger.error('*** Errors found ***\nPlease see log file: ' + log_file)
-
-if __name__ == "__main__":
-  import logging
-  import os
+if __name__ == '__main__':
   import json
+  import logging
   main()

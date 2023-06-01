@@ -11,7 +11,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""AFC System to AFC Device Interface Common Classes - SDI Protocol v1.3"""
+"""AFC System to AFC Device Interface Common Classes - SDI Protocol v1.4"""
 
 import dataclasses
 from dataclasses import dataclass

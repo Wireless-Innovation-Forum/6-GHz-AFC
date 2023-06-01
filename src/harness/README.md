@@ -6,6 +6,8 @@ This directory contains code for the 6 GHz Automated Frequency Coordination (AFC
 * Python 3.10 (https://www.python.org/downloads/release/python-3108/)
 * Requests: HTTP for Humans (https://requests.readthedocs.io/en/latest/)
 * Tomli (https://github.com/hukkin/tomli)
+* [OPTIONAL] Geopy (https://geopy.readthedocs.io/en/stable/)
+  * Used for some inquiry request validator checks. If `geopy` is not installed, these checks will be skipped.
 
 ## Executing the test harness
 Configure the test harness according to [Harness Configuration](#harness-configuration), then execute:
@@ -35,11 +37,11 @@ Harness configuration files are located in `./cfg`. Detailed descriptions of eac
     *   By default, the `{inquiries_dir}` directory is `./inquiries` and the `{masks_dir}` directory is `./masks`.
 
 ## Specification versions
-AFC communication and message validation is performed according to the current version of the Wi-Fi Alliance AFC System to AFC Device Interface Specification Protocol (protocol v1.3, as defined in specification v1.4).
+AFC communication and message validation is performed according to the current version of the Wi-Fi Alliance AFC System to AFC Device Interface Specification Protocol (protocol v1.4, as defined in specification v1.5).
 
-Tests are executed and evaluated according to the current version of the Wi-Fi Alliance AFC System Under Test (SUT) Compliance Test Plan (v1.4).
+Tests are executed and evaluated according to the current version of the Wi-Fi Alliance AFC System Under Test (SUT) Compliance Test Plan (v1.5).
 
-JSON-formatted test vector inquiries provided in `./inquiries` are from the Wi-Fi Alliance AFC System (SUT) Compliance Test Vector Requests (v1.1). 
+JSON-formatted test vector inquiries and response masks provided in `./inquiries` and `./masks` are from the Wi-Fi Alliance AFC System (SUT) Compliance Test Vectors (v1.2). The mask file for AFCS.SRS.1 is created to allow the maximum allowed power for the requested frequency ranges and all channel indices in the requested global operating classes (according to the channel index list in Table E-4 of [IEEE 802.11ax-2021](https://ieeexplore.ieee.org/document/9442429)).
 
 These specifications and test vectors are available from the [Wi-Fi Alliance website](https://www.wi-fi.org/discover-wi-fi/specifications) under "AFC Specification and Test Plans."
 

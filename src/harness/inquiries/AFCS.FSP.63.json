@@ -1,18 +1,15 @@
 {
-  "version": "1.3",
+  "version": "1.4",
   "availableSpectrumInquiryRequests": [
     {
       "requestId": "REQ-FSP63",
       "deviceDescriptor": {
-        "serialNumber": "REG123",
+        "serialNumber": "FSP63",
         "certificationId": [
           {
-            "nra": "FCC",
-            "id": "FCCID-REG123"
+            "rulesetId": "US_47_CFR_PART_15_SUBPART_E",
+            "id": "FCCID-FSP63"
           }
-        ],
-        "rulesetIds": [
-          "US_47_CFR_PART_15_SUBPART_E"
         ]
       },
       "location": {
