@@ -1,83 +1,83 @@
 {
-    "version": "1.3",
-    "availableSpectrumInquiryResponses": [
+  "version": "1.4",
+  "availableSpectrumInquiryResponses": [
+    {
+      "requestId": "11235813",
+      "rulesetId": "US_47_CFR_PART_15_SUBPART_E",
+      "availableFrequencyInfo": [
         {
-            "requestId": "11235813",
-            "rulesetId": "US_47_CFR_PART_15_SUBPART_E",
-            "availableFrequencyInfo": [
-                {
-                    "frequencyRange": {
-                        "lowFrequency": 5925,
-                        "highFrequency": 6020
-                    },
-                    "maxPsd": 23.0
-                },
-                {
-                    "frequencyRange": {
-                        "lowFrequency": 6020,
-                        "highFrequency": 6050
-                    },
-                    "maxPsd": 1.0
-                },
-                {
-                    "frequencyRange": {
-                        "lowFrequency": 6050,
-                        "highFrequency": 6360
-                    },
-                    "maxPsd": 23.0
-                },
-                {
-                    "frequencyRange": {
-                        "lowFrequency": 6360,
-                        "highFrequency": 6390
-                    },
-                    "maxPsd": -24.0
-                },
-                {
-                    "frequencyRange": {
-                        "lowFrequency": 6390,
-                        "highFrequency": 6425
-                    },
-                    "maxPsd": 23.0
-                }
-            ],
-            "availableChannelInfo": [
-                {
-                    "globalOperatingClass": 133,
-                    "channelCfi": [
-                        7,
-                        39,
-                        55,
-                        71,
-                        135,
-                        151,
-                        167
-                    ],
-                    "maxEirp": [
-                        27.8,
-                        36,
-                        36,
-                        36,
-                        36,
-                        33.0,
-                        36
-                    ]
-                },
-                {
-                    "globalOperatingClass": 134,
-                    "channelCfi": [
-                        47
-                    ],
-                    "maxEirp": [
-                        36
-                    ]
-                }
-            ],
-            "availabilityExpireTime": "2020-11-03T13:34:05Z",
-            "response": {
-                "responseCode": 0,
-                "shortDescription": "Success."
-            }
+          "frequencyRange": {
+            "lowFrequency": 5925,
+            "highFrequency": 6020
+          },
+          "maxPsd": 23.0
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6020,
+            "highFrequency": 6050
+          },
+          "maxPsd": 1.0
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6050,
+            "highFrequency": 6360
+          },
+          "maxPsd": 23.0
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6360,
+            "highFrequency": 6390
+          },
+          "maxPsd": -24.0
+        },
+        {
+          "frequencyRange": {
+            "lowFrequency": 6390,
+            "highFrequency": 6425
+          },
+          "maxPsd": 23.0
         }
-    ]
+      ],
+      "availableChannelInfo": [
+        {
+          "globalOperatingClass": 133,
+          "channelCfi": [
+            7,
+            39,
+            55,
+            71,
+            135,
+            151,
+            167
+          ],
+          "maxEirp": [
+            27.8,
+            36,
+            36,
+            36,
+            36,
+            33.0,
+            36
+          ]
+        },
+        {
+          "globalOperatingClass": 134,
+          "channelCfi": [
+            47
+          ],
+          "maxEirp": [
+            36
+          ]
+        }
+      ],
+      "availabilityExpireTime": "2020-11-03T13:34:05Z",
+      "response": {
+        "responseCode": 0,
+        "shortDescription": "Success."
+      }
+    }
+  ]
 }

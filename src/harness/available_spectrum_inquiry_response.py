@@ -11,66 +11,13 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""Available Spectrum Inquiry Response Definitions - SDI Protocol v1.3"""
+"""Available Spectrum Inquiry Response Definitions - SDI Protocol v1.4"""
 
-import enum
-import json
 from dataclasses import dataclass
 from typing import Union
 from contextlib import suppress
 
-from interface_common import FrequencyRange, VendorExtension, init_from_dicts
-
-@enum.unique
-class ResponseCode(enum.Enum):
-  """Available Spectrum Inquiry Response Code Definition
-
-  Reports success or failure of an available spectrum inquiry
-
-  Code -1 represents a general failure
-  Code  0 represents success
-  Codes 100-199 represent errors related to the protocol
-  Codes 300-399 represent errors specific to message exchanges
-    for the inquiry
-  """
-
-  GENERAL_FAILURE = -1
-  SUCCESS = 0
-  VERSION_NOT_SUPPORTED = 100
-  DEVICE_DISALLOWED = 101
-  MISSING_PARAM = 102
-  INVALID_VALUE = 103
-  UNEXPECTED_PARAM = 106
-  UNSUPPORTED_SPECTRUM = 300
-  UNSUPPORTED_BASIS = 301
-  # Other vendor specific codes are allowed by specification
-  # Adding new enum values at runtime not supported by stdlib enum
-  # Could add vendor codes to list or use 3rd party aenum class to add
-  #   unexpected codes at runtime
-  # Currently, Response object creation will try to reference ResponseCode
-  #   enum--if it fails, it falls back to a plain int. All validation checks
-  #   are performed against the enum's value using get_raw_value
-  #VENDOR_SPECIFIC = "VENDOR_SPECIFIC"
-
-  @classmethod
-  def get_raw_value(cls, code):
-    """Returns the raw value of an unknown-typed ResponseCode
-
-    Parameters:
-      code (ResponseCode or int): response code to convert to raw value
-
-    Returns:
-      raw response code values as an int
-    """
-    if isinstance(code, int):
-      return code
-    elif isinstance(code, ResponseCode):
-      return code.value
-    else:
-      return None
-
-  def __repr__(self):
-    return f"ResponseCode({self.value})"
+from interface_common import FrequencyRange, ResponseCode, VendorExtension, init_from_dicts
 
 @dataclass
 class SupplementalInfo:
@@ -226,7 +173,7 @@ class AvailableSpectrumInquiryResponse:
       for chan_info in self.availableChannelInfo:
         string_rep += '\t'.join(('\n'+str(chan_info).lstrip()).splitlines(True))
     if self.availabilityExpireTime is not None:
-      string_rep += (f"\navailablilityExpireTime: {self.availabilityExpireTime}")
+      string_rep += (f"\navailabilityExpireTime: {self.availabilityExpireTime}")
     string_rep += "\nresponse:" + '\t'.join(('\n'+str(self.response).lstrip()).splitlines(True))
     return string_rep
 
@@ -237,7 +184,7 @@ class AvailableSpectrumInquiryResponseMessage:
   Contains responses to one or more spectrum inquiries
 
   Attributes:
-    version: version number of the inquiry request
+    version: version number of the inquiry response
     availableSpectrumInquiryResponses: list of responses to inquiry requests
     vendorExtensions: Optional vendor extensions
   """
@@ -281,4 +228,5 @@ def main():
     print(sample_conv)
 
 if __name__ == '__main__':
+  import json
   main()

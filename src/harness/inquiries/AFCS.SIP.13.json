@@ -1,18 +1,15 @@
 {
-  "version": "1.3",
+  "version": "1.4",
   "availableSpectrumInquiryRequests": [
     {
       "requestId": "REQ-SIP13",
       "deviceDescriptor": {
-        "serialNumber": "REG123",
+        "serialNumber": "SIP13",
         "certificationId": [
           {
-            "nra": "FCC",
-            "id": "FCCID-REG123"
+            "rulesetId": "US_47_CFR_PART_15_SUBPART_E",
+            "id": "FCCID-SIP13"
           }
-        ],
-        "rulesetIds": [
-          "US_47_CFR_PART_15_SUBPART_E"
         ]
       },
       "location": {

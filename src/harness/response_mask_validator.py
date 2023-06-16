@@ -11,11 +11,11 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""AFC Spectrum Inquiry Expected Response Validation - SDI Protocol v1.3
+"""AFC Spectrum Inquiry Expected Response Validation - SDI Protocol v1.4
 
-Validation functions will exhaustively test all fields (i.e.,
+Validation functions will attempt to exhaustively test all fields (i.e.,
 validation does not stop on the first failure, but will report all
-observed failures. Multiple failures may be reported for the same
+observed failures). Multiple failures may be reported for the same
 root cause.
 
 For this reason, list comprehensions are (usually) preferred over
@@ -24,6 +24,7 @@ generators in any/all statements to avoid short-circuit evaluation"""
 from math import isnan
 import expected_inquiry_response as afc_exp
 import available_spectrum_inquiry_response as afc_resp
+from interface_common import ResponseCode
 from response_validator import InquiryResponseValidator
 import sdi_validator_common as sdi_validate
 
@@ -191,13 +192,12 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
                       f'{exp.expectedResponseCodes}')
       else:
         # expectedResponseCodes are valid
-        is_valid &= all([afc_exp.afc_resp.ResponseCode.get_raw_value(code) is not None
+        is_valid &= all([ResponseCode.get_raw_value(code) is not None
                         for code in exp.expectedResponseCodes])
 
         # If SUCCESS is expected response code:
-        if any(afc_exp.afc_resp.ResponseCode.get_raw_value(code) ==
-              afc_exp.afc_resp.ResponseCode.SUCCESS.value for code in exp.expectedResponseCodes):
-
+        if any(ResponseCode.get_raw_value(code) == ResponseCode.SUCCESS.value
+               for code in exp.expectedResponseCodes):
           # At least one of expectedChannelInfo and expectedFrequencyInfo is given
           if exp.expectedChannelInfo is None and exp.expectedFrequencyInfo is None:
             is_valid = False

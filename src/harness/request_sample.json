@@ -1,5 +1,5 @@
 {
-  "version": "1.3",
+  "version": "1.4",
   "availableSpectrumInquiryRequests": [
     {
       "requestId": "11235813",
@@ -7,12 +7,9 @@
         "serialNumber": "ABCDEFG",
         "certificationId": [
           {
-            "nra": "FCC",
+            "rulesetId": "US_47_CFR_PART_15_SUBPART_E",
             "id": "EFGHIJK"
           }
-        ],
-        "rulesetIds": [
-          "US_47_CFR_PART_15_SUBPART_E"
         ]
       },
       "location": {

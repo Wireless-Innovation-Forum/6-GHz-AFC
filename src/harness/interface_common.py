@@ -11,10 +11,13 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""AFC System to AFC Device Interface Common Classes - SDI Protocol v1.3"""
+"""AFC System to AFC Device Interface Common Classes - SDI Protocol v1.4"""
 
+import dataclasses
 from dataclasses import dataclass
+import json
 from typing import Any
+import enum
 
 @dataclass
 class FrequencyRange:
@@ -48,6 +51,57 @@ class FrequencyRange:
   def __str__(self):
     return f"lowFrequency: {self.lowFrequency}\nhighFrequency: {self.highFrequency}"
 
+@enum.unique
+class ResponseCode(enum.Enum):
+  """Available Spectrum Inquiry Response Code Definition
+
+  Reports success or failure of an available spectrum inquiry
+
+  Code -1 represents a general failure
+  Code  0 represents success
+  Codes 100-199 represent errors related to the protocol
+  Codes 300-399 represent errors specific to message exchanges
+    for the inquiry
+  """
+
+  GENERAL_FAILURE = -1
+  SUCCESS = 0
+  VERSION_NOT_SUPPORTED = 100
+  DEVICE_DISALLOWED = 101
+  MISSING_PARAM = 102
+  INVALID_VALUE = 103
+  UNEXPECTED_PARAM = 106
+  UNSUPPORTED_SPECTRUM = 300
+  UNSUPPORTED_BASIS = 301
+  # Other vendor specific codes are allowed by specification
+  # Adding new enum values at runtime not supported by stdlib enum
+  # Could add vendor codes to list or use 3rd party aenum class to add
+  #   unexpected codes at runtime
+  # Currently, Response object creation will try to reference ResponseCode
+  #   enum--if it fails, it falls back to a plain int. All validation checks
+  #   are performed against the enum's value using get_raw_value
+  #VENDOR_SPECIFIC = "VENDOR_SPECIFIC"
+
+  @classmethod
+  def get_raw_value(cls, code):
+    """Returns the raw value of an unknown-typed ResponseCode
+
+    Parameters:
+      code (ResponseCode or int): response code to convert to raw value
+
+    Returns:
+      raw response code values as an int
+    """
+    if isinstance(code, int):
+      return code
+    elif isinstance(code, ResponseCode):
+      return code.value
+    else:
+      return None
+
+  def __repr__(self):
+    return f"ResponseCode({self.value})"
+
 @dataclass
 class VendorExtension:
   """Standard Vendor Extension Interface
@@ -72,3 +126,44 @@ def init_from_dicts(dicts: list[dict], cls):
   Returns:
     dicts with all dictionaries converted to objects of type cls"""
   return [cls(**x) if isinstance(x, dict) else x for x in dicts]
+
+class JSONEncoderSDI(json.JSONEncoder):
+  """Modified version of JSONEncoder that serializes dataclasses and SDI-specific behavior."""
+  def default(self, o):
+    # Handle dataclasses by converting to dict and passing through clean_nones
+    if dataclasses.is_dataclass(o):
+      return self.clean_nones(dataclasses.asdict(o))
+    # Handle ResponseCodes by using the raw numeric value
+    elif isinstance(o, ResponseCode):
+      return ResponseCode.get_raw_value(o)
+    return super().default(o)
+
+  @classmethod
+  def clean_nones(cls, value):
+    """Recursively remove all None values from dictionaries and lists, and returns
+    the result as a new dictionary or list.
+    Also removes -Infinity to handle ExpectedPowerRange lowerBound.
+    Empty lists are left unmodified.
+
+    Parameters:
+      value: variable to be filtered
+
+    Returns:
+      Filtered variable with Nones and -infs removed"""
+    if isinstance(value, list):
+      return [cls.clean_nones(x) for x in value if x is not None]
+    elif isinstance(value, dict):
+      try:
+        return {
+          key: cls.clean_nones(val)
+          for key, val in value.items()
+          if val is not None and val != float('-inf')
+        }
+      except:
+        return {
+          key: cls.clean_nones(val)
+          for key, val in value.items()
+          if val is not None and val != float('-inf')
+        }
+    else:
+      return value

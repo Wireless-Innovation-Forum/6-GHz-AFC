@@ -11,17 +11,18 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""AFC Spectrum Inquiry Response Validation - SDI Protocol v1.3
+"""AFC Spectrum Inquiry Response Validation - SDI Protocol v1.4
 
-Validation functions will exhaustively test all fields (i.e.,
+Validation functions will attempt to exhaustively test all fields (i.e.,
 validation does not stop on the first failure, but will report all
-observed failures. Multiple failures may be reported for the same
+observed failures). Multiple failures may be reported for the same
 root cause."""
 
 import math
 from datetime import datetime
 
 import available_spectrum_inquiry_response as afc_resp
+from interface_common import ResponseCode
 import sdi_validator_common as sdi_validate
 
 class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
@@ -80,14 +81,14 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
       # supplementalInfo is valid
       is_valid &= self.validate_supplemental_info(resp.supplementalInfo)
       try:
-        match afc_resp.ResponseCode.get_raw_value(resp.responseCode):
-          case afc_resp.ResponseCode.MISSING_PARAM.value:
+        match ResponseCode.get_raw_value(resp.responseCode):
+          case ResponseCode.MISSING_PARAM.value:
             disallowed_params = [x for x in vars(resp.supplementalInfo).keys()
                                  if x != 'missingParams']
-          case afc_resp.ResponseCode.INVALID_VALUE.value:
+          case ResponseCode.INVALID_VALUE.value:
             disallowed_params = [x for x in vars(resp.supplementalInfo).keys()
                                  if x != 'invalidParams']
-          case afc_resp.ResponseCode.UNEXPECTED_PARAM.value:
+          case ResponseCode.UNEXPECTED_PARAM.value:
             disallowed_params = [x for x in vars(resp.supplementalInfo).keys()
                                  if x != 'unexpectedParams']
           case _:
@@ -201,8 +202,7 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
     is_valid = self.validate_response(resp.response)
 
     try:
-      if (afc_resp.ResponseCode.get_raw_value(resp.response.responseCode) !=
-          afc_resp.ResponseCode.SUCCESS.value):
+      if ResponseCode.get_raw_value(resp.response.responseCode) != ResponseCode.SUCCESS.value:
         disallowed_fields = ["availableFrequencyInfo",
                              "availableChannelInfo",
                              "availabilityExpireTime"]
@@ -252,6 +252,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
       except(ValueError, IndexError, TypeError):
         self._warning(f'availabilityExpireTime has invalid format: {resp.availabilityExpireTime}')
         is_valid = False
+
+    # vendor extensions are valid
     is_valid &= self.validate_vendor_extension_list(resp.vendorExtensions)
     return is_valid
 
@@ -292,6 +294,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
     except (TypeError, AttributeError) as ex:
       is_valid = False
       self._warning(f'Exception caught validating responses: {ex}')
+
+    # vendorExtensions are valid
     is_valid &= self.validate_vendor_extension_list(msg.vendorExtensions)
     return is_valid
 
