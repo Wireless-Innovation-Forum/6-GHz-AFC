@@ -15,7 +15,8 @@
 
 Validation functions will exhaustively test all fields (i.e.,
 validation does not stop on the first failure, but will report all
-observed failures"""
+observed failures
+"""
 
 import typing
 import dataclasses
@@ -33,7 +34,8 @@ def is_list_of_type(val, subtype):
 
   Returns:
     True if val is a list containing only members of the specified type
-    False otherwise"""
+    False otherwise
+  """
   is_valid = isinstance(val, list) and all(isinstance(x, subtype) for x in val)
   return is_valid
 
@@ -43,7 +45,8 @@ def common_sdi_validator(specific_logic):
   Validates:
     Object can be converted to expected type if necessary
     All type hints are satisfied
-    Any additional conditions specified by the wrapped method"""
+    Any additional conditions specified by the wrapped method
+  """
 
   def wrapper(*args):
     target_class = list(typing.get_type_hints(specific_logic).values())[0]
@@ -60,9 +63,10 @@ def common_sdi_validator(specific_logic):
 class SDIValidatorBase(TestHarnessLogger):
   """Shared validation functionality
 
-  Manages how violations are logged
-  Validates shared SDI message types
-  Provides common functionality"""
+  * Manages how violations are logged
+  * Validates shared SDI message types
+  * Provides common functionality
+"""
 
   _supported_versions = ["1.4"]
 
@@ -78,7 +82,8 @@ class SDIValidatorBase(TestHarnessLogger):
 
     Returns:
       An object of type target_type based on src_obj or
-      None if conversion is not supported"""
+      None if conversion is not supported
+    """
     conv_obj = None
     if isinstance(src_obj, dict):
       try:
@@ -101,7 +106,8 @@ class SDIValidatorBase(TestHarnessLogger):
 
     Returns:
       True if all fields satisfy the dataclass typehints, excluding empty non-required fields
-      False otherwise"""
+      False otherwise
+    """
     is_valid = dataclasses.is_dataclass(obj)
     if is_valid:
       for field_name, field_def in obj.__dataclass_fields__.items():
@@ -135,7 +141,8 @@ class SDIValidatorBase(TestHarnessLogger):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
     # Require frequency order to be correct
     try:
@@ -160,7 +167,8 @@ class SDIValidatorBase(TestHarnessLogger):
       ext (VendorExtension): VendorExtension to be validated
 
     Returns:
-      True always"""
+      True always
+    """
     return True
 
   def validate_version(self, version: str):
@@ -173,7 +181,8 @@ class SDIValidatorBase(TestHarnessLogger):
       version (string): version string to be validated
 
     Returns:
-      True always (warns if version not in supported list)"""
+      True always (warns if version not in supported list)
+    """
     if version not in self._supported_versions:
       self._warning(f'Message version ({version}) is not in list of supported versions '
                     f'({self._supported_versions}). Errors in validation and comparison may '
@@ -191,7 +200,8 @@ class SDIValidatorBase(TestHarnessLogger):
 
     Returns:
       True if all are valid
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
     if exts is not None:
       try:

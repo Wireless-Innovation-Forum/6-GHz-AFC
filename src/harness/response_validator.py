@@ -16,7 +16,8 @@
 Validation functions will attempt to exhaustively test all fields (i.e.,
 validation does not stop on the first failure, but will report all
 observed failures). Multiple failures may be reported for the same
-root cause."""
+root cause.
+"""
 
 import math
 from datetime import datetime
@@ -41,7 +42,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
     # Current spec states that SupplementalInfo should only have one non-empty field
     num_active_fields = sum(1 for field_value in vars(suppl_info).values()
@@ -74,7 +76,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
 
     if resp.supplementalInfo is not None:
@@ -118,7 +121,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     # frequencyRange is valid
     is_valid = self.validate_frequency_range(info.frequencyRange)
 
@@ -144,7 +148,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
     try:
       # channelCfi and maxEirp must have equal lengths
@@ -197,7 +202,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     # response (code, description, supplemental info) is valid
     is_valid = self.validate_response(resp.response)
 
@@ -273,7 +279,8 @@ class InquiryResponseValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = self.validate_version(msg.version)
     try:
       if len(msg.availableSpectrumInquiryResponses) < 1:
@@ -306,7 +313,9 @@ def main():
 
   validator = InquiryResponseValidator(logger=logger)
 
-  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), "sample_files", "response_sample.json"), encoding="UTF-8") as sample_file:
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(),
+                         "sample_files", "response_sample.json"),
+            encoding="UTF-8") as sample_file:
     sample_json = json.load(sample_file)
     sample_conv = afc_resp.AvailableSpectrumInquiryResponseMessage(**sample_json)
     print('Example response is valid: '
@@ -316,11 +325,13 @@ def main():
          f'{validator.validate_available_spectrum_inquiry_response_message(sample_conv)}')
 
     print('Can validate sub-fields with JSON dict directly: '
-         f'{validator.validate_available_spectrum_inquiry_response(sample_json["availableSpectrumInquiryResponses"][0])}')
+      f'''{validator.validate_available_spectrum_inquiry_response(
+           sample_json["availableSpectrumInquiryResponses"][0])}''')
     print('Can validate root message with JSON dict directly: '
          f'{validator.validate_available_spectrum_inquiry_response_message(sample_json)}')
     sample_conv.availableSpectrumInquiryResponses = []
-    empty_list_is_valid = validator.validate_available_spectrum_inquiry_response_message(sample_conv)
+    empty_list_is_valid = validator. \
+                          validate_available_spectrum_inquiry_response_message(sample_conv)
     print('^Errors logged to console by default logger config^')
     print(f'Empty response list is not valid: {not empty_list_is_valid}')
 

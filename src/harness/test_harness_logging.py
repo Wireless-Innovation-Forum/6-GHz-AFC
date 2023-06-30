@@ -49,7 +49,8 @@ class TestHarnessLogger:
   Properties:
     echo_log (bool): Enable echoing long messages to the console
     append_msg_level (bool): Includes the message level in console and log file output
-                             Has no effect on logging framework output"""
+                             Has no effect on logging framework output
+  """
   echo_log: bool
   append_msg_level: bool
   _logger: logging.Logger = None

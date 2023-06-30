@@ -11,7 +11,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-'''AFC SUT Communication Module'''
+"""AFC SUT Communication Module"""
 
 from dataclasses import dataclass
 from importlib import import_module
@@ -28,28 +28,30 @@ requests.packages.urllib3.disable_warnings(requests.urllib3.exceptions.InsecureR
 
 @dataclass
 class ClientCertAuth:
-  '''Contains information for client authentication via client-side certificates
+  """Contains information for client authentication via client-side certificates
 
   Attributes:
     client_cert (str): A path to the client certificate. If client_key is None,
                        this must be a combined cert/key file.
     client_key (str): A path to the private key file associated with the client_cert certificate.
-                      Leave as None if client_cert is a combined cert/key file.'''
+                      Leave as None if client_cert is a combined cert/key file.
+  """
   client_cert: str
   client_key: str = None
 
   def get_cert_info(self):
-    '''Returns the client cert and key in the format needed for the requests library "cert"
+    """Returns the client cert and key in the format needed for the requests library "cert"
     parameter.
 
     If client_key is None, client_cert is returned as-is.
-    Otherwise, a tuple of (client_cert, client_key) is returned.'''
+    Otherwise, a tuple of (client_cert, client_key) is returned.
+    """
     if self.client_key is None:
       return self.client_cert
     return (self.client_cert, self.client_key)
 
 class AfcConnectionHandler(TestHarnessLogger):
-  '''Handles sending requests to and receiving responses from an AFC using the supported
+  """Handles sending requests to and receiving responses from an AFC using the supported
   authentication methods. Issues are logged using the TestHarnessLogger interface.
 
   Supported authentication methods include: None, Client-side HTTPS certificates, and custom
@@ -71,7 +73,8 @@ class AfcConnectionHandler(TestHarnessLogger):
                                             not enforce client authentication, or it may be one of
                                             the supported auth types (ClientCertAuth or a object
                                             implementing the request library's AuthBase interface).
-    timeout (float): The timeout to be used for all network operations, in seconds.'''
+    timeout (float): The timeout to be used for all network operations, in seconds.
+  """
   base_url: str
   method_url: str = "availableSpectrumInquiry"
   auth_info: Union[ClientCertAuth, auth.AuthBase] = None
@@ -79,7 +82,7 @@ class AfcConnectionHandler(TestHarnessLogger):
   _resp: requests.Response = None
 
   def __init__(self, connection, *args, auth_info: dict = None, **kwargs):
-    '''Creates an instance of AfcConnectionHandler
+    """Creates an instance of AfcConnectionHandler
 
     Parameters (Non-Inherited):
       connection (dict or str): A dictionary containing keys for base_url (required),
@@ -87,15 +90,16 @@ class AfcConnectionHandler(TestHarnessLogger):
                                 given, the value is used for base_url, and method_url and timeout
                                 are left as their default values.
       auth_info (dict): A dictionary containing the options for client authentication.
-                      These include:
-                        type (str): "none", "cert" [ClientCertAuth-type], "custom" [AuthBase-type]
-                        options (dict): Allowed options depend on auth_info->type.
-                          Type "none": Entire dict is ignored.
-                          Type "cert": Expect options matching attributes of ClientCertAuth
-                          Type "custom":
-                            auth_module (str): Path to python module containing desired auth class
-                            auth_class (str): Name of python class implementing AuthBase
-                            auth_config (dict): Any additional options required by auth_class'''
+                        These options include:
+                          type (str): "none", "cert" [ClientCertAuth-type], "custom" [AuthBase-type]
+                          options (dict): Allowed options depend on auth_info->type.
+                            Type "none": Entire dict is ignored.
+                            Type "cert": Expect options matching attributes of ClientCertAuth
+                            Type "custom":
+                          auth_module (str): Path to python module containing desired auth class
+                          auth_class (str): Name of python class implementing AuthBase
+                          auth_config (dict): Any additional options required by auth_class
+    """
     super().__init__(*args, **kwargs)
 
     if isinstance(connection, dict):
@@ -136,7 +140,7 @@ class AfcConnectionHandler(TestHarnessLogger):
                                **kwargs)
 
   def send_request(self, request_json: dict):
-    '''Performs an HTTP Post request with the provided dictionary encoded as JSON.
+    """Performs an HTTP Post request with the provided dictionary encoded as JSON.
     Results of any previous request are cleared, and the result of this request stored in
     the AfcConnectionHandler object for access.
 
@@ -147,7 +151,8 @@ class AfcConnectionHandler(TestHarnessLogger):
       None [Result of POST can be accessed using get_last_response() and get_last_http_code()]
 
     Raises:
-      ValueError if the configured base_url does not have an https prefix'''
+      ValueError if the configured base_url does not have an https prefix
+    """
     # Remove existing response
     self._resp = None
 
@@ -159,7 +164,6 @@ class AfcConnectionHandler(TestHarnessLogger):
           self._resp = None # Ensure response field is None to indicate missing response
           self._warning('Unable to establish secure connection with AFC; possibly a client cert '
                        f'validation error? Exception details: {ex}')
-
       case auth.AuthBase():
         self._base_send_request(auth=self.auth_info, json=request_json)
       case None:
@@ -178,7 +182,8 @@ class AfcConnectionHandler(TestHarnessLogger):
 
     Raises:
       requests.exceptions.JSONDecodeError if as_json is True but the response content was not valid
-        JSON."""
+        JSON.
+    """
     if self._resp is None:
       return None
     if as_json:
@@ -190,35 +195,40 @@ class AfcConnectionHandler(TestHarnessLogger):
     response exists.
 
     Returns:
-      Ff a valid response is available: the response HTTP status code as an int
-      Otherwise: None"""
+      If a valid response is available: the response HTTP status code as an int
+      Otherwise: None
+    """
     if self._resp is None:
       return None
     return self._resp.status_code
 
   def get_afc_url(self):
-    '''Helper function for concatenating base_url and method_url.
+    """Helper function for concatenating base_url and method_url.
 
     Returns:
-      The full URL used for AFC communication'''
+      The full URL used for AFC communication
+    """
     return urljoin(self.base_url, self.method_url)
 
 def main():
   """Example usage of AfcConnectionHandler.
-  Loads the AFC connection configuration from a TOML file
-  Sends request_sample.json
-  Looks at the response code and received JSON dict"""
+
+  * Loads the AFC connection configuration from a TOML file, 
+  * Sends request_sample.json, 
+  * Looks at the response code and received JSON dict
+  """
   base_path = pathlib.Path(__file__).parent.resolve()
   with open(os.path.join(base_path, 'cfg', 'afc.toml'), 'rb') as config_file:
     afc_config = tomli.load(config_file)
   afc_obj = AfcConnectionHandler(**afc_config)
-  with open(os.path.join(base_path, 'sample_files', 'request_sample.json'), encoding='utf-8') as fin:
+  with open(os.path.join(base_path, 'sample_files', 'request_sample.json'),
+            encoding='utf-8') as fin:
     req_json = json.load(fin)
 
   afc_obj.send_request(req_json)
 
   print(f'Status Code: {afc_obj.get_last_http_code()}')
-  print(f'Response data: {afc_obj.get_last_response()}')
+  print(f'Response Data: {afc_obj.get_last_response()}')
 
 if __name__ == '__main__':
   import json

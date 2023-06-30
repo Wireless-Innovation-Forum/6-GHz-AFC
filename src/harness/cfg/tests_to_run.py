@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-'''tests_to_run.py establishes which tests to run.
+"""tests_to_run.py establishes which tests to run.
 
 For each test <test> in the list tests_to_run, the corresponding spectrum
 inquiry file <test>.json must exist in the /inquiries directory. The
@@ -22,10 +22,10 @@ response from the SUT is compared to the allowed mask for that test.
 If the first element of the list is 'all', all test files (*.json) that
 are in the /inquiries directory are run. The contents of the list after
 the first element ('all') are ignored.
-'''
+"""
 
 def tests_to_run():
-  '''Returns the list of tests to be run'''
+  """Returns the list of tests to be run"""
   return ['all',
           'AFCS.FSP.1',
           'AFCS.FSP.2',

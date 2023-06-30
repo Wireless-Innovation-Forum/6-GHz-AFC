@@ -24,13 +24,14 @@ class FrequencyRange:
   """Frequency Range specification for spectrum availability requests and responses
 
   Ranges run from lowFrequency (inclusive) up to but not including highFrequency,
-  that is: the range [lowFrequency, highFrequency). Current SDI spec (as of protocol document v1.4)
+  that is: the range [lowFrequency, highFrequency). Current SDI spec (as of protocol document v1.5)
   does not specify this interpretation, but it is implied by the spec's sample_response (contiguous
   frequency ranges sharing a high/low freq value)
 
   Attributes:
     lowFrequency: lowest frequency in the range, expressed in MHz
-    highFrequency: highest frequency in the range, expressed in MHz"""
+    highFrequency: highest frequency in the range, expressed in MHz
+  """
   lowFrequency: int
   highFrequency: int
 
@@ -45,7 +46,8 @@ class FrequencyRange:
 
     Returns:
       True if ranges overlap (At least one range endpoint is contained within the other range
-      False otherwise"""
+      False otherwise
+    """
     return self.lowFrequency < other.highFrequency and other.lowFrequency < self.highFrequency
 
   def __str__(self):
@@ -124,7 +126,8 @@ def init_from_dicts(dicts: list[dict], cls):
     cls (class type): target class for dictionary conversion
 
   Returns:
-    dicts with all dictionaries converted to objects of type cls"""
+    dicts with all dictionaries converted to objects of type cls
+  """
   return [cls(**x) if isinstance(x, dict) else x for x in dicts]
 
 class JSONEncoderSDI(json.JSONEncoder):
@@ -149,7 +152,8 @@ class JSONEncoderSDI(json.JSONEncoder):
       value: variable to be filtered
 
     Returns:
-      Filtered variable with Nones and -infs removed"""
+      Filtered variable with Nones and -infs removed
+    """
     if isinstance(value, list):
       return [cls.clean_nones(x) for x in value if x is not None]
     elif isinstance(value, dict):

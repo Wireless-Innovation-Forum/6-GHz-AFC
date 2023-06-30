@@ -209,7 +209,9 @@ class AvailableSpectrumInquiryResponseMessage:
 
 def main():
   """Demonstrates loading and printing inquiry responses"""
-  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), "sample_files", "response_sample.json"), encoding="UTF-8") as sample_file:
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(),
+                         "sample_files","response_sample.json"),
+            encoding="UTF-8") as sample_file:
     sample_json = json.load(sample_file)
     sample_conv = AvailableSpectrumInquiryResponseMessage(**sample_json)
     sample_conv2 = AvailableSpectrumInquiryResponseMessage(**sample_json)
