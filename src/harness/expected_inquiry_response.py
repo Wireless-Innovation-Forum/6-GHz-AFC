@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from contextlib import suppress
 from operator import attrgetter
 from typing import Union
+from math import isfinite
 
 from interface_common import FrequencyRange, ResponseCode, VendorExtension, init_from_dicts
 
@@ -60,11 +61,18 @@ class ExpectedPowerRange:
     return self.lowerBound <= val <= self.upperBound
 
   def __str__(self):
+    placeholder_str = "x" if self.nominalValue is None else f"x ({self.nominalValue})"
     if self.lowerBound == float('-inf'):
-      return f'x <= {self.upperBound}'
+      return f'{placeholder_str} <= {self.upperBound}'
     return (f'{self.lowerBound} <= '
-            f'{self.nominalValue if self.nominalValue is not None else "x"} <= '
+            f'{placeholder_str} <= '
             f'{self.upperBound}')
+
+  def __repr__(self):
+    safe_float_reprs = [repr(x) if x is None or isfinite(x) else f'float("{repr(x)}")'
+                        for x in [self.upperBound, self.nominalValue, self.lowerBound]]
+    return (f"ExpectedPowerRange({safe_float_reprs[0]}, {safe_float_reprs[1]}, "
+            f"{safe_float_reprs[2]})")
 
 @dataclass
 class ExpectedAvailableFrequencyInfo:

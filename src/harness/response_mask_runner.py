@@ -23,7 +23,7 @@ import available_spectrum_inquiry_response as afc_resp
 from response_validator import InquiryResponseValidator
 from response_mask_validator import ResponseMaskValidator
 import expected_inquiry_response as afc_exp
-from interface_common import ResponseCode
+from interface_common import ResponseCode, pformat_sdi
 from test_harness_logging import TestHarnessLogger
 
 class ResponseMaskRunner(TestHarnessLogger):
@@ -103,13 +103,13 @@ class ResponseMaskRunner(TestHarnessLogger):
       if received.response.responseCode in expected.disallowedResponseCodes:
         received_expected = False
         self._error(f'Received disallowed response code: {received.response.responseCode} '
-                    f'(Expected: {expected.expectedResponseCodes}')
+                    f'(Expected: {pformat_sdi(expected.expectedResponseCodes)}')
       else:
         self._warning(f'Received unexpected response code: {received.response.responseCode}. '
                       f'Possibly vendor extension?')
     else:
       self._info(f'Received response code ({received.response.responseCode}) '
-                 f'matches mask codes ({expected.expectedResponseCodes})')
+                 f'matches mask codes ({pformat_sdi(expected.expectedResponseCodes)})')
 
     # Frequency range checks
     if received.availableFrequencyInfo is not None:

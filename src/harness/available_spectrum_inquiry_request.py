@@ -359,10 +359,11 @@ def main():
 
     print(f"Messages from same source report equal: {sample_conv == sample_conv2}")
     print(f"Can recreate object from repr: {eval(repr(sample_conv)) == sample_conv}")
-    print(sample_conv)
+    print(pformat_sdi(sample_conv))
 
 if __name__ == '__main__':
   import json
   import os
   import pathlib
+  from interface_common import pformat_sdi
   main()
