@@ -209,15 +209,7 @@ class AvailableSpectrumInquiryResponseMessage:
 
 def main():
   """Demonstrates loading and printing inquiry responses"""
-
-  raw_obj = json.loads('{"version": "5",'
-    '"availableSpectrumInquiryResponses": '
-      '[{"requestId": "1", "response": {"responseCode": -1}, "rulesetId": "2"}, '
-      '{"requestId": "2", "rulesetId": "4", "response": {"responseCode": 0}}]}')
-
-  conv_obj = AvailableSpectrumInquiryResponseMessage(**raw_obj)
-  print(conv_obj)
-  with open('src/harness/response_sample.json', encoding="UTF-8") as sample_file:
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), "sample_files", "response_sample.json"), encoding="UTF-8") as sample_file:
     sample_json = json.load(sample_file)
     sample_conv = AvailableSpectrumInquiryResponseMessage(**sample_json)
     sample_conv2 = AvailableSpectrumInquiryResponseMessage(**sample_json)
@@ -229,4 +221,6 @@ def main():
 
 if __name__ == '__main__':
   import json
+  import os
+  import pathlib
   main()

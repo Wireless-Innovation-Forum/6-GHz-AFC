@@ -314,7 +314,7 @@ def main():
 
   validator = ResponseMaskValidator(logger=logger)
 
-  with open('src/harness/mask_sample.json', encoding='UTF-8') as sample_file:
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), "sample_files", "mask_sample.json"), encoding='UTF-8') as sample_file:
     mask_json = json.load(sample_file)
     mask_obj = afc_exp.ExpectedSpectrumInquiryResponseMessage(**mask_json)
 
@@ -325,4 +325,6 @@ def main():
 if __name__ == '__main__':
   import json
   import logging
+  import os
+  import pathlib
   main()

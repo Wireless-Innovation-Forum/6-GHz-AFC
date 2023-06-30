@@ -329,12 +329,12 @@ def main():
 
   runner = ResponseMaskRunner(logger=logger)
 
-  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), 'response_sample.json'),
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), "sample_files", "response_sample.json"),
             encoding="UTF-8") as sample_resp_file:
     sample_resp_json = json.load(sample_resp_file)
     sample_resp = afc_resp.AvailableSpectrumInquiryResponseMessage(**sample_resp_json)
 
-  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), 'mask_sample.json'),
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), "sample_files", "mask_sample.json"),
        encoding="UTF-8") as sample_mask_file:
     sample_mask_json = json.load(sample_mask_file)
     sample_mask = afc_exp.ExpectedSpectrumInquiryResponseMessage(**sample_mask_json)

@@ -306,7 +306,7 @@ def main():
 
   validator = InquiryResponseValidator(logger=logger)
 
-  with open('src/harness/response_sample.json', encoding="UTF-8") as sample_file:
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), "sample_files", "response_sample.json"), encoding="UTF-8") as sample_file:
     sample_json = json.load(sample_file)
     sample_conv = afc_resp.AvailableSpectrumInquiryResponseMessage(**sample_json)
     print('Example response is valid: '
@@ -327,4 +327,6 @@ def main():
 if __name__ == '__main__':
   import json
   import logging
+  import os
+  import pathlib
   main()

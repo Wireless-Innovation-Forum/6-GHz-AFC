@@ -47,9 +47,9 @@ These specifications and test vectors are available from the [Wi-Fi Alliance web
 
 ## Sample files
 Example json files for the inquiry request, response, and response mask are provided as:
-*   **./request_sample.json**
-*   **./response_sample.json**
-*   **./mask_sample.json**
+*   **./sample_files/request_sample.json**
+*   **./sample_files/response_sample.json**
+*   **./sample_files/mask_sample.json**
 
 ## Harness output
 *   **Console output**

@@ -208,10 +208,11 @@ def main():
   Loads the AFC connection configuration from a TOML file
   Sends request_sample.json
   Looks at the response code and received JSON dict"""
-  with open('cfg/afc.toml', 'rb') as config_file:
+  base_path = pathlib.Path(__file__).parent.resolve()
+  with open(os.path.join(base_path, 'cfg', 'afc.toml'), 'rb') as config_file:
     afc_config = tomli.load(config_file)
   afc_obj = AfcConnectionHandler(**afc_config)
-  with open('request_sample.json', encoding='utf-8') as fin:
+  with open(os.path.join(base_path, 'sample_files', 'request_sample.json'), encoding='utf-8') as fin:
     req_json = json.load(fin)
 
   afc_obj.send_request(req_json)
@@ -222,4 +223,6 @@ def main():
 if __name__ == '__main__':
   import json
   import tomli
+  import os
+  import pathlib
   main()
