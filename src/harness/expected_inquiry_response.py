@@ -197,3 +197,24 @@ class ExpectedSpectrumInquiryResponseMessage:
     if self.vendorExtensions is not None:
       with suppress(TypeError):
         self.vendorExtensions = init_from_dicts(self.vendorExtensions, VendorExtension)
+
+def main():
+  """Demonstrates loading and printing expected inquiry responses"""
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(),
+                         "sample_files", "mask_sample.json"),
+            encoding="UTF-8") as sample_file:
+    sample_json = json.load(sample_file)
+    sample_conv = ExpectedSpectrumInquiryResponseMessage(**sample_json)
+    sample_conv2 = ExpectedSpectrumInquiryResponseMessage(**sample_json)
+
+    print(f"Masks from same source report equal: {sample_conv == sample_conv2}")
+    print(repr(sample_conv))
+    print(f"Can recreate object from repr: {eval(repr(sample_conv)) == sample_conv}")
+    print(pformat_sdi(sample_conv))
+
+if __name__ == '__main__':
+  import json
+  import os
+  import pathlib
+  from interface_common import pformat_sdi
+  main()
