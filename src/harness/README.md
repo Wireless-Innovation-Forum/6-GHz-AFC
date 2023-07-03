@@ -1,6 +1,16 @@
 # The 6 GHz AFC Test Harness
 
-This directory contains code for the 6 GHz Automated Frequency Coordination (AFC) System Under Test (SUT) test harness.
+## Overview
+This directory contains code for the 6 GHz Automated Frequency Coordination (AFC) System Under Test (SUT) test harness. This harness performs the following actions:
+* Connects to an AFC SUT via HTTPS
+* Validates and sends pre-determined spectrum availability request(s) to the AFC SUT
+* Receives and validates the AFC SUT's availability response(s)
+* Compares the AFC SUT's availability response(s) to predetermined expected response(s)
+* Creates log files detailing:
+  * Observed violations of the AFC System-Device Interface specification in the requests or responses (if any)
+  * The results of all comparisons
+
+A webinar introducing the AFC SUT test process, including a demonstration of executing the test harness, is available on YouTube [here](https://www.youtube.com/watch?v=HdYKPeq87BI).
 
 ## Code prerequisites
 * Python 3.10 (https://www.python.org/downloads/release/python-3108/)
