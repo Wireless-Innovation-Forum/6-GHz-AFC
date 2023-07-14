@@ -5,6 +5,7 @@
       "requestId": "REQ-URS1",
       "rulesetId": "US_47_CFR_PART_15_SUBPART_E",
       "expectedResponseCodes": [
+        102,
         103,
         -1
       ]

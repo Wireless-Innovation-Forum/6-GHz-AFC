@@ -87,7 +87,8 @@ class Point:
       None
     
     Returns:
-      Tuple of (x, y, z) coordinates"""
+      Tuple of (x, y, z) coordinates
+    """
     return (math.cos(math.radians(self.latitude))*math.cos(math.radians(self.longitude)),
             math.cos(math.radians(self.latitude))*math.sin(math.radians(self.longitude)),
             math.sin(math.radians(self.latitude)))
@@ -117,7 +118,8 @@ class Vector:
       New Point reached by traveling along the vector, starting at src
       
     Throws:
-      ImportError if geopy module is not available"""
+      ImportError if geopy module is not available
+    """
     _geopy_check()
     geopy_dist = great_circle(meters=self.length)
     geopy_pt = geopy_dist.destination((src.latitude, src.longitude), bearing=self.angle)
@@ -348,15 +350,20 @@ class AvailableSpectrumInquiryRequestMessage:
 
 def main():
   """Demonstrates loading and printing inquiry requests"""
-  with open('request_sample.json', encoding="UTF-8") as sample_file:
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(),
+                         "sample_files", "request_sample.json"),
+            encoding="UTF-8") as sample_file:
     sample_json = json.load(sample_file)
     sample_conv = AvailableSpectrumInquiryRequestMessage(**sample_json)
     sample_conv2 = AvailableSpectrumInquiryRequestMessage(**sample_json)
 
     print(f"Messages from same source report equal: {sample_conv == sample_conv2}")
     print(f"Can recreate object from repr: {eval(repr(sample_conv)) == sample_conv}")
-    print(sample_conv)
+    print(pformat_sdi(sample_conv))
 
 if __name__ == '__main__':
   import json
+  import os
+  import pathlib
+  from interface_common import pformat_sdi
   main()

@@ -16,13 +16,14 @@
 Mask runner functions will compare the provided response mask to a received response
 and provide an expected/unexpected result, logging results along the way. Comparison is performed
 exhaustively (i.e., comparison does not stop on first unexpected value, but will attempt to report
-all unexpected values. Multiple issues may be reported for the same root cause."""
+all unexpected values. Multiple issues may be reported for the same root cause.
+"""
 
 import available_spectrum_inquiry_response as afc_resp
 from response_validator import InquiryResponseValidator
 from response_mask_validator import ResponseMaskValidator
 import expected_inquiry_response as afc_exp
-from interface_common import ResponseCode
+from interface_common import ResponseCode, pformat_sdi
 from test_harness_logging import TestHarnessLogger
 
 class ResponseMaskRunner(TestHarnessLogger):
@@ -62,7 +63,8 @@ class ResponseMaskRunner(TestHarnessLogger):
       False otherwise
 
     Throws:
-      ValueError if expected is not valid"""
+      ValueError if expected is not valid
+    """
 
     # Validate objects (if requested)
     if validate_objects:
@@ -101,13 +103,13 @@ class ResponseMaskRunner(TestHarnessLogger):
       if received.response.responseCode in expected.disallowedResponseCodes:
         received_expected = False
         self._error(f'Received disallowed response code: {received.response.responseCode} '
-                    f'(Expected: {expected.expectedResponseCodes}')
+                    f'(Expected: {pformat_sdi(expected.expectedResponseCodes)}')
       else:
         self._warning(f'Received unexpected response code: {received.response.responseCode}. '
                       f'Possibly vendor extension?')
     else:
       self._info(f'Received response code ({received.response.responseCode}) '
-                 f'matches mask codes ({expected.expectedResponseCodes})')
+                 f'matches mask codes ({pformat_sdi(expected.expectedResponseCodes)})')
 
     # Frequency range checks
     if received.availableFrequencyInfo is not None:
@@ -253,8 +255,8 @@ class ResponseMaskRunner(TestHarnessLogger):
       False otherwise
 
     Throws:
-      ValueError if expected is not valid"""
-
+      ValueError if expected is not valid
+    """
     if validate_objects:
       if not self.recv_validator.validate_available_spectrum_inquiry_response_message(received):
         self._warning('Received message does not pass validation; errors in comparison may result')
@@ -329,12 +331,14 @@ def main():
 
   runner = ResponseMaskRunner(logger=logger)
 
-  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), 'response_sample.json'),
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(),
+                         "sample_files", "response_sample.json"),
             encoding="UTF-8") as sample_resp_file:
     sample_resp_json = json.load(sample_resp_file)
     sample_resp = afc_resp.AvailableSpectrumInquiryResponseMessage(**sample_resp_json)
 
-  with open(os.path.join(pathlib.Path(__file__).parent.resolve(), 'mask_sample.json'),
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(),
+                         "sample_files", "mask_sample.json"),
        encoding="UTF-8") as sample_mask_file:
     sample_mask_json = json.load(sample_mask_file)
     sample_mask = afc_exp.ExpectedSpectrumInquiryResponseMessage(**sample_mask_json)

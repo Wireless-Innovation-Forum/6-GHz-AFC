@@ -19,7 +19,8 @@ observed failures). Multiple failures may be reported for the same
 root cause.
 
 For this reason, list comprehensions are (usually) preferred over
-generators in any/all statements to avoid short-circuit evaluation"""
+generators in any/all statements to avoid short-circuit evaluation
+"""
 
 from math import isnan
 import expected_inquiry_response as afc_exp
@@ -51,7 +52,8 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
 
     try:
@@ -97,7 +99,8 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = self.validate_frequency_range(info.frequencyRange)
     is_valid &= self.validate_expected_power_range(info.maxPsd)
     return is_valid
@@ -116,7 +119,8 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
 
     # Transfer channel info (minus eirp data) to AvailableChannelClass for validation
@@ -149,7 +153,7 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
       if len(info.channelCfi) != len(list(set(info.channelCfi))):
         is_valid = False
         self._warning('ExpectedAvailableChannelInfo contains duplicate '
-                    f'channelCFIs: {info.channelCfi}')
+                     f'channelCFIs: {info.channelCfi}')
     except TypeError as ex:
       is_valid = False
       self._warning(f'Exception caught while looking for duplicate channelCfis: {ex}')
@@ -180,7 +184,8 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     # vendorExtensions are valid
     is_valid = self.validate_vendor_extension_list(exp.vendorExtensions)
 
@@ -277,7 +282,8 @@ class ResponseMaskValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
 
     # Version string is valid
     is_valid = self.validate_version(exp.version)
@@ -314,7 +320,9 @@ def main():
 
   validator = ResponseMaskValidator(logger=logger)
 
-  with open('src/harness/mask_sample.json', encoding='UTF-8') as sample_file:
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(),
+                         "sample_files", "mask_sample.json"),
+            encoding='UTF-8') as sample_file:
     mask_json = json.load(sample_file)
     mask_obj = afc_exp.ExpectedSpectrumInquiryResponseMessage(**mask_json)
 
@@ -325,4 +333,6 @@ def main():
 if __name__ == '__main__':
   import json
   import logging
+  import os
+  import pathlib
   main()

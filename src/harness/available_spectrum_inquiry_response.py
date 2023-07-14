@@ -36,16 +36,6 @@ class SupplementalInfo:
   invalidParams: list[str] = None
   unexpectedParams: list[str] = None
 
-  def __str__(self):
-    string_rep = ""
-    if self.missingParams is not None:
-      string_rep += f"\nmissingParams: {self.missingParams}"
-    if self.invalidParams is not None:
-      string_rep += f"\ninvalidParams: {self.invalidParams}"
-    if self.unexpectedParams is not None:
-      string_rep += f"\nunexpectedParams: {self.unexpectedParams}"
-    return string_rep.strip()
-
 @dataclass
 class Response:
   """Response field for a inquiry response
@@ -70,14 +60,6 @@ class Response:
       with suppress(TypeError):
         self.supplementalInfo = SupplementalInfo(**self.supplementalInfo)
 
-  def __str__(self):
-    string_rep = f"responseCode: {str(self.responseCode)}"
-    if self.shortDescription is not None:
-      string_rep += f"\nshortDescription: {self.shortDescription}"
-    if self.supplementalInfo is not None:
-      string_rep += f"\nsupplementalInfo: {str(self.supplementalInfo)}"
-    return string_rep
-
 @dataclass
 class AvailableFrequencyInfo:
   """Available Frequency Information
@@ -98,11 +80,6 @@ class AvailableFrequencyInfo:
       with suppress(TypeError):
         self.frequencyRange = FrequencyRange(**self.frequencyRange)
 
-  def __str__(self):
-    return ("frequencyRange:" +
-      '\t'.join(('\n'+str(self.frequencyRange).lstrip()).splitlines(True)) +
-      f"\nmaxPsd: {self.maxPsd}")
-
 @dataclass
 class AvailableChannelInfo:
   """Available Channel Information
@@ -118,11 +95,6 @@ class AvailableChannelInfo:
   globalOperatingClass: Union[float, int]
   channelCfi: list[Union[float, int]]
   maxEirp: list[Union[float, int]]
-
-  def __str__(self):
-    return (f"globalOperatingClass: {self.globalOperatingClass}" +
-        f"\nchannelCfi: {self.channelCfi}" +
-        f"\nmaxEirp: {self.maxEirp}")
 
 @dataclass
 class AvailableSpectrumInquiryResponse:
@@ -162,21 +134,6 @@ class AvailableSpectrumInquiryResponse:
       with suppress(TypeError):
         self.vendorExtensions = init_from_dicts(self.vendorExtensions, VendorExtension)
 
-  def __str__(self):
-    string_rep = f"requestId: {self.requestId}\nrulesetId: {self.rulesetId}"
-    if self.availableFrequencyInfo is not None:
-      string_rep += "\navailableFrequencyInfo:"
-      for freq_info in self.availableFrequencyInfo:
-        string_rep += '\t'.join(('\n'+str(freq_info).lstrip()).splitlines(True))
-    if self.availableChannelInfo is not None:
-      string_rep += "\navailableChannelInfo:"
-      for chan_info in self.availableChannelInfo:
-        string_rep += '\t'.join(('\n'+str(chan_info).lstrip()).splitlines(True))
-    if self.availabilityExpireTime is not None:
-      string_rep += (f"\navailabilityExpireTime: {self.availabilityExpireTime}")
-    string_rep += "\nresponse:" + '\t'.join(('\n'+str(self.response).lstrip()).splitlines(True))
-    return string_rep
-
 @dataclass
 class AvailableSpectrumInquiryResponseMessage:
   """Top-level Spectrum Inquiry Response Message
@@ -201,32 +158,23 @@ class AvailableSpectrumInquiryResponseMessage:
       with suppress(TypeError):
         self.vendorExtensions = init_from_dicts(self.vendorExtensions, VendorExtension)
 
-  def __str__(self):
-    string_rep = f"version: {self.version}\navailableSpectrumInquiryResponses:"
-    for resp in self.availableSpectrumInquiryResponses:
-      string_rep += '\t'.join(('\n'+str(resp).lstrip()).splitlines(True))
-    return string_rep
-
 def main():
   """Demonstrates loading and printing inquiry responses"""
-
-  raw_obj = json.loads('{"version": "5",'
-    '"availableSpectrumInquiryResponses": '
-      '[{"requestId": "1", "response": {"responseCode": -1}, "rulesetId": "2"}, '
-      '{"requestId": "2", "rulesetId": "4", "response": {"responseCode": 0}}]}')
-
-  conv_obj = AvailableSpectrumInquiryResponseMessage(**raw_obj)
-  print(conv_obj)
-  with open('src/harness/response_sample.json', encoding="UTF-8") as sample_file:
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(),
+                         "sample_files","response_sample.json"),
+            encoding="UTF-8") as sample_file:
     sample_json = json.load(sample_file)
     sample_conv = AvailableSpectrumInquiryResponseMessage(**sample_json)
     sample_conv2 = AvailableSpectrumInquiryResponseMessage(**sample_json)
 
-    print(f"Repr for ResponseCode: {repr(ResponseCode.INVALID_VALUE)}")
+    print(f"Valid repr for ResponseCode: {repr(ResponseCode.INVALID_VALUE)}")
     print(f"Messages from same source report equal: {sample_conv == sample_conv2}")
     print(f"Can recreate object from repr: {eval(repr(sample_conv)) == sample_conv}")
-    print(sample_conv)
+    print(pformat_sdi(sample_conv))
 
 if __name__ == '__main__':
   import json
+  import os
+  import pathlib
+  from interface_common import pformat_sdi
   main()

@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-''' Top main script of the test harness.
+""" Top main script of the test harness.
 
 Before running:
   - Edit cfg/harness.toml and cfg/afc.toml to configure the harness and provide connection info
@@ -28,7 +28,7 @@ Note: The above files and directories can be overridden via config files and cmd
     in the harness.toml file
   - The paths used for input/output (logs, inquiries, masks, etc.) can be overridden in the
     harness.toml file
-'''
+"""
 
 # Standard python modules
 from datetime import datetime
@@ -64,7 +64,8 @@ class TestResult(Enum):
   EXPECTED:  Received response fits the response mask
   UNEXPECTED:  Received response violates the response mask
   SKIPPED: An error was encountered in parsing the request, response, or response mask.
-           No determination about EXPECTED/UNEXPECTED is implied by a SKIPPED result."""
+           No determination about EXPECTED/UNEXPECTED is implied by a SKIPPED result.
+  """
   EXPECTED  = auto()
   UNEXPECTED  = auto()
   SKIPPED = auto()
@@ -84,7 +85,8 @@ class TestResultStorage():
 
     Parameters:
       test_name (str): Name of test performed
-      test_result (str): Result of performed test"""
+      test_result (str): Result of performed test
+    """
     self._named_results[test_result].append(test_name)
     self._count_results[test_result] += 1
 
@@ -101,8 +103,7 @@ class TestResultStorage():
             f'     Skipped tests: {self._count_results[TestResult.SKIPPED]}')
 
 def main():
-  '''Sends inquiry request to SUT for each requested test and validates responses'''
-
+  """Sends inquiry request to SUT for each requested test and validates responses"""
   ## Parse command line arguments
   parser = ArgumentParser()
   parser.add_argument('--harness_cfg', action='store', default='cfg/harness.toml')
@@ -345,7 +346,7 @@ def main():
       else:
         logger.warning('Response does NOT appear valid. Will attempt test anyway...')
 
-      logger.debug(f'Parsing received response as a response object...')
+      logger.debug('Parsing received response as a response object...')
       try:
         response_obj = AvailableSpectrumInquiryResponseMessage(**response)
       except TypeError as ex:
@@ -354,7 +355,7 @@ def main():
         continue
 
       # Compare response to mask
-      logger.debug(f'Comparing response to mask...')
+      logger.debug('Comparing response to mask...')
       try:
         if mask_runner.run_test_response_message(mask_obj, response_obj, validate_objects=False):
           logger.info('Response meets mask requirements. Result EXPECTED.\n')

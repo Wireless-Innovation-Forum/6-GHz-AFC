@@ -16,7 +16,8 @@
 Validation functions will attempt to exhaustively test all fields (i.e.,
 validation does not stop on the first failure, but will report all
 observed failures). Multiple failures may be reported for the same
-root cause."""
+root cause.
+"""
 
 import math
 import itertools
@@ -49,7 +50,8 @@ class _Edge:
     
     Parameters:
       p (Point): Point used for intersection check
-      eps: Allowed tolerance on equality check used to determine intersection (in meters)"""
+      eps: Allowed tolerance on equality check used to determine intersection (in meters)
+    """
     arc_intersect_length = self.vertex1.distance_to(p) + self.vertex2.distance_to(p)
     return math.fabs(self.length - arc_intersect_length) < eps
 
@@ -234,7 +236,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
 
     # globalOperatingClass must be a valid, finite number
@@ -269,7 +272,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
 
     # latitude is a valid number in the range [-90, 90]
@@ -302,7 +306,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
 
     # length is a valid, finite number
@@ -336,7 +341,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
 
     # height is a valid, finite number
@@ -383,7 +389,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
 
     # center is valid
     is_valid = self.validate_point(poly.center)
@@ -451,7 +458,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
 
     is_valid = True
 
@@ -510,7 +518,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
 
     # center is a valid point
     is_valid = self.validate_point(ellipse.center)
@@ -566,7 +575,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
 
     # elevation is valid
     is_valid = self.validate_elevation(loc.elevation)
@@ -627,7 +637,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
     # rulesetId is an acceptable value
     acceptable_values = ['US_47_CFR_PART_15_SUBPART_E', 'CA_RES_DBS-06']
@@ -649,7 +660,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = True
     try:
       # certificationId contains at least one value
@@ -685,7 +697,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     # deviceDescriptor is valid
     is_valid = self.validate_device_descriptor(req.deviceDescriptor)
 
@@ -755,7 +768,8 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     Returns:
       True if all checks are satisfied
-      False otherwise"""
+      False otherwise
+    """
     is_valid = self.validate_version(msg.version)
     try:
       if len(msg.availableSpectrumInquiryRequests) < 1:
@@ -788,21 +802,27 @@ def main():
 
   validator = InquiryRequestValidator(logger=logger)
 
-  with open('src/harness/request_sample.json', encoding="UTF-8") as sample_file:
+  with open(os.path.join(pathlib.Path(__file__).parent.resolve(),
+                         "sample_files", "request_sample.json"),
+            encoding="UTF-8") as sample_file:
     sample_json = json.load(sample_file)
     sample_conv = afc_req.AvailableSpectrumInquiryRequestMessage(**sample_json)
     print('Example request is valid: '
          f'{validator.validate_available_spectrum_inquiry_request_message(sample_conv)}')
     print('Can validate sub-fields with JSON dict directly: '
-         f'{validator.validate_available_spectrum_inquiry_request(sample_json["availableSpectrumInquiryRequests"][0])}')
+      f'''{validator.validate_available_spectrum_inquiry_request(
+           sample_json["availableSpectrumInquiryRequests"][0])}''')
     print('Can validate root message with JSON dict directly: '
          f'{validator.validate_available_spectrum_inquiry_request_message(sample_json)}')
     sample_conv.availableSpectrumInquiryRequests = []
-    empty_list_is_valid = validator.validate_available_spectrum_inquiry_request_message(sample_conv)
+    empty_list_is_valid = validator. \
+                          validate_available_spectrum_inquiry_request_message(sample_conv)
     print('^Errors logged to console by default logger config^')
     print(f'Empty response list is not valid: {not empty_list_is_valid}')
 
 if __name__ == '__main__':
   import json
   import logging
+  import os
+  import pathlib
   main()

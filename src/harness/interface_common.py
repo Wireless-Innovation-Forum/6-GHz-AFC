@@ -15,6 +15,7 @@
 
 import dataclasses
 from dataclasses import dataclass
+from itertools import repeat
 import json
 from typing import Any
 import enum
@@ -24,13 +25,14 @@ class FrequencyRange:
   """Frequency Range specification for spectrum availability requests and responses
 
   Ranges run from lowFrequency (inclusive) up to but not including highFrequency,
-  that is: the range [lowFrequency, highFrequency). Current SDI spec (as of protocol document v1.4)
+  that is: the range [lowFrequency, highFrequency). Current SDI spec (as of protocol document v1.5)
   does not specify this interpretation, but it is implied by the spec's sample_response (contiguous
   frequency ranges sharing a high/low freq value)
 
   Attributes:
     lowFrequency: lowest frequency in the range, expressed in MHz
-    highFrequency: highest frequency in the range, expressed in MHz"""
+    highFrequency: highest frequency in the range, expressed in MHz
+  """
   lowFrequency: int
   highFrequency: int
 
@@ -45,11 +47,9 @@ class FrequencyRange:
 
     Returns:
       True if ranges overlap (At least one range endpoint is contained within the other range
-      False otherwise"""
+      False otherwise
+    """
     return self.lowFrequency < other.highFrequency and other.lowFrequency < self.highFrequency
-
-  def __str__(self):
-    return f"lowFrequency: {self.lowFrequency}\nhighFrequency: {self.highFrequency}"
 
 @enum.unique
 class ResponseCode(enum.Enum):
@@ -102,6 +102,9 @@ class ResponseCode(enum.Enum):
   def __repr__(self):
     return f"ResponseCode({self.value})"
 
+  def __str__(self):
+    return self.name
+
 @dataclass
 class VendorExtension:
   """Standard Vendor Extension Interface
@@ -124,7 +127,8 @@ def init_from_dicts(dicts: list[dict], cls):
     cls (class type): target class for dictionary conversion
 
   Returns:
-    dicts with all dictionaries converted to objects of type cls"""
+    dicts with all dictionaries converted to objects of type cls
+  """
   return [cls(**x) if isinstance(x, dict) else x for x in dicts]
 
 class JSONEncoderSDI(json.JSONEncoder):
@@ -149,7 +153,8 @@ class JSONEncoderSDI(json.JSONEncoder):
       value: variable to be filtered
 
     Returns:
-      Filtered variable with Nones and -infs removed"""
+      Filtered variable with Nones and -infs removed
+    """
     if isinstance(value, list):
       return [cls.clean_nones(x) for x in value if x is not None]
     elif isinstance(value, dict):
@@ -167,3 +172,51 @@ class JSONEncoderSDI(json.JSONEncoder):
         }
     else:
       return value
+
+def pformat_sdi(o, indent=4) -> str:
+  """Pretty-formats a string representation of a value, intended for use with
+  SDI dataclass types.
+
+  For non-dataclass objects, the formatted string is equivalent to str(o)
+  
+  Parameters:
+    o (Any): Value to be formatted
+    indent: Amount of spaces to indent each nested layer by (default: 4)
+    
+  Returns:
+    The pretty-formatted string representation of an object
+  """
+  if dataclasses.is_dataclass(o):
+    string_rep = ""
+    for field in dataclasses.fields(o):
+      value = getattr(o, field.name)
+      if value is not None:
+        if hasattr(value, "__len__") and any(dataclasses.is_dataclass(x) for x in value):
+          # Non-scalar dataclass field
+          for (idx, item) in enumerate(value):
+            string_rep += f'{field.name}[{idx}]:' \
+                        + (' '*indent).join(('\n'+pformat_sdi(item).lstrip()).splitlines(True)) \
+                        + '\n'
+          string_rep = string_rep.rstrip()
+        elif hasattr(value, "__len__") and not isinstance(value, str):
+          # Other non-scalar non-string fields
+          string_rep += f'{field.name}: ' \
+                      + str(value)[0] \
+                      + ", ".join(map(pformat_sdi, value, repeat(indent))) \
+                      + str(value)[-1]
+        elif dataclasses.is_dataclass(value) and type(value).__str__ is object.__str__:
+          # Scalar dataclass field with default __str__
+          string_rep += f'{field.name}:' \
+                      + (' '*indent).join(('\n'+pformat_sdi(value).lstrip()).splitlines(True))
+        else:
+          # Other fields
+          string_rep += f'{field.name}: {value}'
+        string_rep += '\n'
+    return string_rep.rstrip()
+
+  # For collections, ensure str() is used instead of repr()
+  if hasattr(o, "__len__") and not isinstance(o, str):
+    return f'{str(o)[0]}{", ".join(map(pformat_sdi, o, repeat(indent)))}{str(o)[-1]}'
+
+  # Return normal string for scalar non-dataclasses
+  return str(o)
