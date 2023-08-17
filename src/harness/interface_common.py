@@ -164,18 +164,11 @@ class JSONEncoderSDI(json.JSONEncoder):
     if isinstance(value, list):
       return [cls.clean_nones(x) for x in value if x is not None]
     elif isinstance(value, dict):
-      try:
-        return {
-          key: cls.clean_nones(val)
-          for key, val in value.items()
-          if val is not None and val != float('-inf')
-        }
-      except:
-        return {
-          key: cls.clean_nones(val)
-          for key, val in value.items()
-          if val is not None and val != float('-inf')
-        }
+      return {
+        key: cls.clean_nones(val)
+        for key, val in value.items()
+        if val is not None and val != float('-inf')
+      }
     else:
       return value
 

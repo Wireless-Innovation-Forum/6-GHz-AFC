@@ -808,7 +808,7 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
           self._warning('Message should have no more than one occurrence of any given requestId')
     except (TypeError, AttributeError) as ex:
       is_valid = False
-      self._warning(f'Exception caught validating responses: {ex}')
+      self._warning(f'Exception caught validating requests: {ex}')
 
     # vendorExtensions are valid
     is_valid &= self.validate_vendor_extension_list(msg.vendorExtensions)

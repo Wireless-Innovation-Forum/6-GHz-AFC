@@ -339,7 +339,7 @@ def main():
       try:
         response = afc_obj.get_last_response()
       except JSONDecodeError as ex:
-        logger.error('Received response could not be decoded as valid JSON. Raw response test: '
+        logger.error('Received response could not be decoded as valid JSON. Raw response text: '
                     f'"{afc_obj.get_last_response(as_json=False)}". Result UNEXPECTED.\n')
         results.add_result(test_name, TestResult.UNEXPECTED)
         continue
@@ -354,15 +354,15 @@ def main():
 
       # Checking that response is valid
       if response_validator.validate_available_spectrum_inquiry_response_message(response):
-        logger.info('Response appears valid.')
+        logger.info('Response content appears valid.')
       else:
-        logger.warning('Response does NOT appear valid. Will attempt test anyway...')
+        logger.warning('Response content does NOT appear valid. Will attempt test anyway...')
 
       logger.debug('Parsing received response as a response object...')
       try:
         response_obj = AvailableSpectrumInquiryResponseMessage(**response)
       except TypeError as ex:
-        logger.error(f'Exception converting response for comparison: {ex}. Test SKIPPED.\n')
+        logger.fatal(f'Exception converting response for comparison: {ex}. Test SKIPPED.\n')
         results.add_result(test_name, TestResult.SKIPPED)
         continue
 
