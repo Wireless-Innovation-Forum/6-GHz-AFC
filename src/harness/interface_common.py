@@ -129,7 +129,13 @@ def init_from_dicts(dicts: list[dict], cls):
   Returns:
     dicts with all dictionaries converted to objects of type cls
   """
-  return [cls(**x) if isinstance(x, dict) else x for x in dicts]
+  def safe_init(x, cls):
+    try:
+      return cls(**x)
+    except Exception:
+      return x
+
+  return [safe_init(x, cls) if isinstance(x, dict) else x for x in dicts]
 
 class JSONEncoderSDI(json.JSONEncoder):
   """Modified version of JSONEncoder that serializes dataclasses and SDI-specific behavior."""
