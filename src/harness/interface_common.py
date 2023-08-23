@@ -129,7 +129,13 @@ def init_from_dicts(dicts: list[dict], cls):
   Returns:
     dicts with all dictionaries converted to objects of type cls
   """
-  return [cls(**x) if isinstance(x, dict) else x for x in dicts]
+  def safe_init(x, cls):
+    try:
+      return cls(**x)
+    except Exception:
+      return x
+
+  return [safe_init(x, cls) if isinstance(x, dict) else x for x in dicts]
 
 class JSONEncoderSDI(json.JSONEncoder):
   """Modified version of JSONEncoder that serializes dataclasses and SDI-specific behavior."""
@@ -158,18 +164,11 @@ class JSONEncoderSDI(json.JSONEncoder):
     if isinstance(value, list):
       return [cls.clean_nones(x) for x in value if x is not None]
     elif isinstance(value, dict):
-      try:
-        return {
-          key: cls.clean_nones(val)
-          for key, val in value.items()
-          if val is not None and val != float('-inf')
-        }
-      except:
-        return {
-          key: cls.clean_nones(val)
-          for key, val in value.items()
-          if val is not None and val != float('-inf')
-        }
+      return {
+        key: cls.clean_nones(val)
+        for key, val in value.items()
+        if val is not None and val != float('-inf')
+      }
     else:
       return value
 

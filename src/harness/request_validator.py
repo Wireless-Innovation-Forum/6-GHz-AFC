@@ -763,6 +763,18 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
       Each AvailableSpectrumInquiryRequest has a unique requestId
       vendorExtensions are valid
 
+    Warns:
+      If request message contains a mixture of valid and invalid requests
+        This situation may be handled differently by various AFC implementations,
+        making the creation of a mask file difficult. For instance, an AFC might:
+          * Process each request individually, returning HTTP code 200 and a mix of
+            SDI SUCCESS and error response codes
+          * Ignore any valid requests within the message, returning HTTP code 400 and
+            the relevant SDI error response codes for each request
+        Use of mixed valid and invalid requests is discouraged within a single request message.
+        See GitHub PR #41 (https://github.com/Wireless-Innovation-Forum/6-GHz-AFC/pull/41)
+        for more details.
+
     Parameters:
       msg (AvailableSpectrumInquiryRequestMessage): Message to be validated
 
@@ -778,8 +790,15 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
                       f'list must be at least 1: {msg.availableSpectrumInquiryRequests}')
       else:
         # availableSpectrumInquiryRequests exist and are all valid
-        is_valid &= all([self.validate_available_spectrum_inquiry_request(x)
-                        for x in msg.availableSpectrumInquiryRequests])
+        valid_request_flags = [self.validate_available_spectrum_inquiry_request(x)
+                               for x in msg.availableSpectrumInquiryRequests]
+        is_valid &= all(valid_request_flags)
+
+        # Log a special warning for mixtures of valid and invalid requests
+        if True in valid_request_flags and False in valid_request_flags:
+          self._warning('Request message contains a mixture of valid and invalid requests. The '
+                        'expected response for this type of request may be ambiguous '
+                        '(see GitHub PR#41). Issues executing this test may occur in some cases.')
 
         # Each availableSpectrumInquiryRequest has a unique requestID
         resp_ids = [sub_resp.requestId for sub_resp in msg.availableSpectrumInquiryRequests]
@@ -789,7 +808,7 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
           self._warning('Message should have no more than one occurrence of any given requestId')
     except (TypeError, AttributeError) as ex:
       is_valid = False
-      self._warning(f'Exception caught validating responses: {ex}')
+      self._warning(f'Exception caught validating requests: {ex}')
 
     # vendorExtensions are valid
     is_valid &= self.validate_vendor_extension_list(msg.vendorExtensions)

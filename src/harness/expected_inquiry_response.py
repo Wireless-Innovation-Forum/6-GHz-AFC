@@ -164,12 +164,12 @@ class ExpectedSpectrumInquiryResponse:
             with suppress(ValueError):
               self.disallowedResponseCodes[idx] = ResponseCode(code)
     if self.expectedFrequencyInfo is not None:
-      with suppress(TypeError):
+      with suppress(TypeError, AttributeError):
         self.expectedFrequencyInfo = init_from_dicts(self.expectedFrequencyInfo,
                                                       ExpectedAvailableFrequencyInfo)
         self.expectedFrequencyInfo.sort(key=attrgetter('frequencyRange.lowFrequency'))
     if self.expectedChannelInfo is not None:
-      with suppress(TypeError):
+      with suppress(TypeError, AttributeError):
         self.expectedChannelInfo = init_from_dicts(self.expectedChannelInfo,
                                                    ExpectedAvailableChannelInfo)
         self.expectedChannelInfo.sort(key=attrgetter('channelCfi'))

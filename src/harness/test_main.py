@@ -274,6 +274,14 @@ def main():
         results.add_result(test_name, TestResult.SKIPPED)
         continue
 
+      # Check if mask is expecting the response to indicate an error (alters handling of HTTP
+      # status code and request validation)
+      expected_error_flags = [any(ResponseCode.get_raw_value(code) != ResponseCode.SUCCESS.value
+                                   for code in exp.expectedResponseCodes)
+                              for exp in mask_obj.expectedSpectrumInquiryResponses]
+      expect_any_error = any(expected_error_flags)
+      expect_only_error = all(expected_error_flags)
+
       # Read the contents of the request file in text format
       logger.debug(f'Loading request file {request_file}...')
       with open(request_file, encoding='utf-8') as fin:
@@ -294,13 +302,11 @@ def main():
       # Validate request JSON
       logger.debug('Validating imported request JSON...')
       if not request_validator.validate_available_spectrum_inquiry_request_message(request_json):
-        logger.info('Request does not pass SDI validation--checking if mask expects an error...')
-        if any(any(ResponseCode.get_raw_value(code) != ResponseCode.SUCCESS.value
-                   for code in exp.expectedResponseCodes)
-               for exp in mask_obj.expectedSpectrumInquiryResponses):
-          logger.info('Mask expects an error code, so sending invalid request anyway.')
+        if expect_any_error:
+          logger.info('Request does not pass SDI validation, but mask expects an error, so '
+                      'sending invalid request anyway.')
         else:
-          logger.fatal('Request does not pass SDI validation, but response mask doesn\'t expect '
+          logger.fatal('Request does not pass SDI validation, and response mask doesn\'t expect '
                        'an error. Test SKIPPED.\n')
           results.add_result(test_name, TestResult.SKIPPED)
           continue
@@ -311,23 +317,29 @@ def main():
       logger.info(f'Sending request to AFC via {afc_obj.get_afc_url()}...')
       afc_obj.send_request(request_json)
 
-      # Check for valid HTTP response and code
+      # Check for valid HTTP response and status code
       resp_code = afc_obj.get_last_http_code()
       if resp_code is None:
         logger.error('Failed to receive an HTTP response from the AFC. Result UNEXPECTED.\n')
         results.add_result(test_name, TestResult.UNEXPECTED)
         continue
-      if not 200 <= resp_code <= 299:
-        logger.error(f'Expected response HTTP code of 2XX, got: {afc_obj.get_last_http_code()}. '
-                      'Result UNEXPECTED.\n')
-        results.add_result(test_name, TestResult.UNEXPECTED)
-        continue
+      # If HTTP status code is not expected, test result will be UNEXPECTED, but run the rest of
+      # the test anyway for logging/reporting purposes
+      http_code_mismatch = False
+      # Allow HTTP status code 400 if no successful response is expected
+      if not (200 <= resp_code <= 299 or (expect_only_error and resp_code == 400)):
+        http_code_mismatch = True
+        logger.error(f'Expected HTTP status code of 2XX{" or 400" if expect_only_error else ""} '
+                     f'but received: {resp_code}.')
+      else:
+        logger.info(f'Received HTTP status code of {resp_code} is acceptable '
+                    f'(expected 2XX{" or 400" if expect_only_error else ""}).')
 
       # Ensure response can be decoded as JSON
       try:
         response = afc_obj.get_last_response()
       except JSONDecodeError as ex:
-        logger.error('Received response could not be decoded as valid JSON. Raw response test: '
+        logger.error('Received response could not be decoded as valid JSON. Raw response text: '
                     f'"{afc_obj.get_last_response(as_json=False)}". Result UNEXPECTED.\n')
         results.add_result(test_name, TestResult.UNEXPECTED)
         continue
@@ -342,24 +354,37 @@ def main():
 
       # Checking that response is valid
       if response_validator.validate_available_spectrum_inquiry_response_message(response):
-        logger.info('Response appears valid.')
+        logger.info('Response content appears valid.')
       else:
-        logger.warning('Response does NOT appear valid. Will attempt test anyway...')
+        logger.warning('Response content does NOT appear valid. Will attempt test anyway...')
 
       logger.debug('Parsing received response as a response object...')
       try:
         response_obj = AvailableSpectrumInquiryResponseMessage(**response)
       except TypeError as ex:
-        logger.error(f'Exception converting response for comparison: {ex}. Test SKIPPED.\n')
+        logger.fatal(f'Exception converting response for comparison: {ex}. Test SKIPPED.\n')
         results.add_result(test_name, TestResult.SKIPPED)
         continue
+
+      # If HTTP 400 was received, check that it is permitted (i.e., no SDI SUCCESS codes inside)
+      # (Note: SDI SUCCESS with HTTP 400 is a contradiction per WINNF-TS-3007 V1.2.0 (Sec 6.3.5))
+      if resp_code == 400 and any(resp.response.responseCode == ResponseCode.SUCCESS.value
+                                  for resp in response_obj.availableSpectrumInquiryResponses):
+        logger.error('Response message contains successful responses, but was delivered with HTTP '
+                     'status code 400 (BAD_REQUEST).')
+        http_code_mismatch = True
 
       # Compare response to mask
       logger.debug('Comparing response to mask...')
       try:
         if mask_runner.run_test_response_message(mask_obj, response_obj, validate_objects=False):
-          logger.info('Response meets mask requirements. Result EXPECTED.\n')
-          results.add_result(test_name, TestResult.EXPECTED)
+          if http_code_mismatch:
+            logger.error('Response content meets mask requirements, but HTTP status code is not '
+                         'valid (see prior error). Result UNEXPECTED.\n')
+            results.add_result(test_name, TestResult.UNEXPECTED)
+          else:
+            logger.info('Response meets mask requirements. Result EXPECTED.\n')
+            results.add_result(test_name, TestResult.EXPECTED)
         else:
           logger.error('Response does not meet mask requirements. Result UNEXPECTED.\n')
           results.add_result(test_name, TestResult.UNEXPECTED)
