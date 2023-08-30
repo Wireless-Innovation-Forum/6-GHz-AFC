@@ -39,10 +39,12 @@ The only required option that must be configured before use is setting the addre
 
 ### Authentication methods
 The test harness supports client authentication using client certificates and python classes that accept a single argument to `__init__()` and follow the interface set by the [requests library's AuthBase interface](https://requests.readthedocs.io/en/latest/user/authentication/#new-forms-of-authentication). Files related to authentication are stored in `./auth`. An example authentication method using a file-based bearer token is included in `./auth/custom_auth.py`. This file can be used as a starting place for other authentication methods.
+
 ### Configuration file descriptions
 Harness configuration files are located in `./cfg`. Detailed descriptions of each configuration file and documentation for all permitted options is available within each config file. Files with a `.toml` extension follow the [TOML standard](https://toml.io/en/). Summaries of the provided configuration files are below:
 *   **./cfg/harness.toml**: Specifies the AFC configuration file, test list module, and input/output directories.
-*   **./cfg/afc.toml**: AFC SUT connection options, including any authentication information. See the documentation for the `AfcConnectionHandler` class in `./afc.py` or the descriptions in `./cfg/afc.toml` for more details.
+*   **./cfg/afc.toml**: AFC SUT connection options, including SUT URL, network timeouts, and any authentication information. See the documentation for the `AfcConnectionHandler` class in `./afc.py` or the descriptions in `./cfg/afc.toml` for more details.
+    * NOTE: As of 2023-08-31, this file overrides the default network timeout value (15 minutes instead of 10 seconds). This value may be raised or lowered as desired for testing any given AFC SUT.
 *   **./cfg/tests_to_run.py**: Specify tests to run from the `{inquiries_dir}` directory. If 'all' is listed first, harness executes on all `(test_name).json` files in `{inquiries_dir}`. Corresponding response masks should be placed in the `{masks_dir}` directory, named as `(test_name)_mask.json`. This file should contain a valid python function that returns a list of test names.
     *   By default, the `{inquiries_dir}` directory is `./inquiries` and the `{masks_dir}` directory is `./masks`.
 
