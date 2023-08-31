@@ -30,7 +30,7 @@
 
 base_url = 'https://YOUR_AFC_ADDRESS_HERE'
 #method_url = 'availableSpectrumInquiry'
-#timeout = 10.0
+timeout = 900.0 # Override harness default timeout to 15 minutes
 
 [auth_info]
 # Specifies the client authentication configuration for AFC under test.
