@@ -40,7 +40,7 @@ sut_config = 'cfg/afc.toml'
 #   mask_dir - Path to the directory containing the expected inquiry responses for each test
 #   log_dir = Path where test harness output will be logged during execution
 
-#inquiry_dir = 'inquiries'
-#response_dir = 'responses'
-#mask_dir = 'masks'
+#inquiry_dir = 'test_vectors/v1.2/inquiries'
+#response_dir = 'test_vectors/v1.2/responses'
+#mask_dir = 'test_vectors/v1.2/masks'
 #log_dir = 'logs'
