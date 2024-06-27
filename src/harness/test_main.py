@@ -124,9 +124,9 @@ def main():
   ## Setup directories
   paths_cfg = harness_cfg.get("paths", {})
   log_dir = paths_cfg.get("log_dir", "logs")
-  request_dir = paths_cfg.get("inquiry_dir", "inquiries")
-  response_dir = paths_cfg.get("response_dir", "responses")
-  mask_dir = paths_cfg.get("mask_dir", "masks")
+  request_dir = paths_cfg.get("inquiry_dir", "test_vectors/v1.2/inquiries")
+  response_dir = paths_cfg.get("response_dir", "test_vectors/v1.2/responses")
+  mask_dir = paths_cfg.get("mask_dir", "test_vectors/v1.2/masks")
 
   ## Choose SUT config file
   if args.sut_cfg is not None:
