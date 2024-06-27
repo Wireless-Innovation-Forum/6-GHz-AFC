@@ -1,0 +1,64 @@
+{
+  "version": "1.4",
+  "availableSpectrumInquiryRequests": [
+    {
+      "requestId": "REQ-SIP13",
+      "deviceDescriptor": {
+        "serialNumber": "SIP13",
+        "certificationId": [
+          {
+            "rulesetId": "US_47_CFR_PART_15_SUBPART_E",
+            "id": "FCCID-SIP13"
+          }
+        ]
+      },
+      "location": {
+        "elevation": {
+          "height": 6.0,
+          "heightType": "AGL",
+          "verticalUncertainty": 2
+        },
+        "ellipse": {
+          "center": {
+            "longitude": -64.864822,
+            "latitude": 17.69417
+          },
+          "majorAxis": 150,
+          "minorAxis": 150,
+          "orientation": 0.0
+        },
+        "indoorDeployment": 0
+      },
+      "inquiredFrequencyRange": [
+        {
+          "lowFrequency": 5925,
+          "highFrequency": 6425
+        },
+        {
+          "lowFrequency": 6525,
+          "highFrequency": 6875
+        }
+      ],
+      "inquiredChannels": [
+        {
+          "globalOperatingClass": 131
+        },
+        {
+          "globalOperatingClass": 132
+        },
+        {
+          "globalOperatingClass": 133
+        },
+        {
+          "globalOperatingClass": 134
+        },
+        {
+          "globalOperatingClass": 136
+        },
+        {
+          "globalOperatingClass": 137
+        }
+      ]
+    }
+  ]
+}
