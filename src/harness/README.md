@@ -46,14 +46,14 @@ Harness configuration files are located in `./cfg`. Detailed descriptions of eac
 *   **./cfg/afc.toml**: AFC SUT connection options, including SUT URL, network timeouts, and any authentication information. See the documentation for the `AfcConnectionHandler` class in `./afc.py` or the descriptions in `./cfg/afc.toml` for more details.
     * NOTE: As of 2023-08-31, this file overrides the default network timeout value (15 minutes instead of 10 seconds). This value may be raised or lowered as desired for testing any given AFC SUT.
 *   **./cfg/tests_to_run.py**: Specify tests to run from the `{inquiries_dir}` directory. If 'all' is listed first, harness executes on all `(test_name).json` files in `{inquiries_dir}`. Corresponding response masks should be placed in the `{masks_dir}` directory, named as `(test_name)_mask.json`. This file should contain a valid python function that returns a list of test names.
-    *   By default, the `{inquiries_dir}` directory is `./inquiries` and the `{masks_dir}` directory is `./masks`.
+    *   By default, the `{inquiries_dir}` directory is `./test_vectors/latest/inquiries` and the `{masks_dir}` directory is `./test_vectors/latest/masks`.
 
 ## Specification versions
 AFC communication and message validation is performed according to the current version of the Wi-Fi Alliance AFC System to AFC Device Interface Specification Protocol (protocol v1.4, as defined in specification v1.5).
 
 Tests are executed and evaluated according to the current version of the Wi-Fi Alliance AFC System Under Test (SUT) Compliance Test Plan (v1.5).
 
-JSON-formatted test vector inquiries and response masks provided in `./inquiries` and `./masks` are from the Wi-Fi Alliance AFC System (SUT) Compliance Test Vectors (v1.2). The mask file for AFCS.SRS.1 is created to allow the maximum allowed power for the requested frequency ranges and all channel indices in the requested global operating classes (according to the channel index list in Table E-4 of [IEEE 802.11ax-2021](https://ieeexplore.ieee.org/document/9442429)).
+JSON-formatted test vector inquiries and response masks provided in `./test_vectors` are from the Wi-Fi Alliance AFC System (SUT) Compliance Test Vectors (v1.2 and v1.3). The mask file for AFCS.SRS.1 is created to allow the maximum allowed power for the requested frequency ranges and all channel indices in the requested global operating classes (according to the channel index list in Table E-4 of [IEEE 802.11ax-2021](https://ieeexplore.ieee.org/document/9442429)).
 
 These specifications and test vectors are available from the [Wi-Fi Alliance website](https://www.wi-fi.org/discover-wi-fi/specifications) under "AFC Specification and Test Plans."
 
@@ -74,7 +74,7 @@ Example json files for the inquiry request, response, and response mask are prov
     *   By default, `logs_dir` is `./logs`
 *   **{response_dir}/(test_name)\_response\_(datetime).json**
     *   Copies of the received response for `test_name`
-    *   By default, `response_dir` is `./responses`
+    *   By default, `response_dir` is `./test_vectors/latest/responses`
 
 ## Code location
 * Test framework:
