@@ -47,9 +47,9 @@ A description of each data repository is provided in [WINNF-TS-5008](https://6gh
    1. None
 
 ### <a name="antenna-gain-diameter"></a>Antenna Model, Diameter and Gain
- * Current version: [v1.0](https://github.com/Wireless-Innovation-Forum/6-GHz-AFC/blob/main/data/common_data/antenna_model_diameter_gain.csv) - Used for Initial Certification (Published: 1-25-2023) [[commit](https://github.com/Wireless-Innovation-Forum/6-GHz-AFC/commit/81c1091e7ebed865c4a88d6687e449db20053cd1)]
+ * Current version: [v2.0](https://github.com/Wireless-Innovation-Forum/6-GHz-AFC/blob/main/data/common_data/antenna_model_diameter_gain.csv) - Additional entries and modifications (Published: 4-1-2025) [[commit](https://github.com/Wireless-Innovation-Forum/6-GHz-AFC/commit/485341ee87db6da3eb23ae1984591d840d1fd0fa)]
  * Previous versions:
-   1. None
+   1. [v1.0](https://github.com/Wireless-Innovation-Forum/6-GHz-AFC/blob/81c1091e7ebed865c4a88d6687e449db20053cd1/data/common_data/antenna_model_diameter_gain.csv) - Used for Initial Certification (Published: 1-25-2023) [[commit](https://github.com/Wireless-Innovation-Forum/6-GHz-AFC/commit/81c1091e7ebed865c4a88d6687e449db20053cd1)]
 
 ### <a name="transmit-radio"></a>Transmit Radio Unit Architecture
  * Current version: [v1.0](https://github.com/Wireless-Innovation-Forum/6-GHz-AFC/blob/main/data/common_data/transmit_radio_unit_architecture.csv) - Used for Initial Certification (Published: 2-23-2023) [[commit](https://github.com/Wireless-Innovation-Forum/6-GHz-AFC/commit/867b484a55d92f283c8ea188ad506921b40bdc6c)]
