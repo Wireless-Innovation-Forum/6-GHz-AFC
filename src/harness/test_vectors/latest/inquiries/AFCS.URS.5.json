@@ -1,0 +1,63 @@
+{
+  "version": "1.4",
+  "availableSpectrumInquiryRequests": [
+    {
+      "requestId": "REQ-URS5",
+      "deviceDescriptor": {
+        "serialNumber": "URS5",
+        "certificationId": [
+          {
+            "rulesetId": "US_47_CFR_PART_15_SUBPART_E",
+            "id": "FCCID-URS5"
+          }
+        ]
+      },
+      "location": {
+        "elevation": {
+          "heightType": "AGL",
+          "verticalUncertainty": 2
+        },
+        "ellipse": {
+          "center": {
+            "longitude": -75.161307,
+            "latitude": 39.949079
+          },
+          "majorAxis": 100,
+          "minorAxis": 50,
+          "orientation": 45.0
+        },
+        "indoorDeployment": 0
+      },
+      "inquiredFrequencyRange": [
+        {
+          "lowFrequency": 5925,
+          "highFrequency": 6425
+        },
+        {
+          "lowFrequency": 6525,
+          "highFrequency": 6875
+        }
+      ],
+      "inquiredChannels": [
+        {
+          "globalOperatingClass": 131
+        },
+        {
+          "globalOperatingClass": 132
+        },
+        {
+          "globalOperatingClass": 133
+        },
+        {
+          "globalOperatingClass": 134
+        },
+        {
+          "globalOperatingClass": 136
+        },
+        {
+          "globalOperatingClass": 137
+        }
+      ]
+    }
+  ]
+}
