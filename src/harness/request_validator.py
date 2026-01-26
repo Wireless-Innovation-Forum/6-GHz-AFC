@@ -361,7 +361,7 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     # verticalUncertainty is a valid, positive, finite integer
     try:
-      if not (0 <= elev.verticalUncertainty):
+      if not (0 < elev.verticalUncertainty):
         raise TypeError()
     except TypeError:
       is_valid = False
@@ -526,7 +526,7 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     # majorAxis is a valid, positive integer
     try:
-      if not (0 <= ellipse.majorAxis):
+      if not (0 < ellipse.majorAxis):
         raise TypeError()
     except TypeError:
       is_valid = False
@@ -534,7 +534,7 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
 
     # minorAxis is a valid, positive integer
     try:
-      if not (0 <= ellipse.minorAxis):
+      if not (0 < ellipse.minorAxis):
         raise TypeError()
     except TypeError:
       is_valid = False
