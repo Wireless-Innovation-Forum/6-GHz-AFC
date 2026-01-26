@@ -318,7 +318,7 @@ class InquiryRequestValidator(sdi_validate.SDIValidatorBase):
       is_valid = False
       self._warning(f'Length ({vector.length}) must be a single finite numeric value')
 
-    # angle is a valid number in the range [-90, 90]
+    # angle is a valid number in the range [0, 360]
     try:
       if not (0 <= vector.angle <= 360):
         raise TypeError()
