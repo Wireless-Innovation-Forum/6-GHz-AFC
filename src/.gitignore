@@ -2,7 +2,7 @@
 **/__pycache__
 harness/logs
 !harness/logs/README.md
-harness/responses/*.json
+harness/test_vectors/*/responses/*.json
 harness/auth
 !harness/auth/*.py
 !harness/auth/README.md
